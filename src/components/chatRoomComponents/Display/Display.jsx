@@ -11,7 +11,7 @@ function Display({ className }) {
   const bottomTextMessageRef = useRef(null);
   const { messages, currentChatId } = useChatRoom();
   const [isWelcomePage, setIsWelcomePage] = useState(
-    currentChatId !== "68c0671711b70a88b9b0cd90" || false
+    currentChatId !== "68c0671711b70a88b9b0cd90" || false,
   );
   const { user, accessToken } = useAuth();
   const currentDate = new Date();
@@ -25,44 +25,43 @@ function Display({ className }) {
   useEffect(() => {
     bottomTextMessageRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+  const showMessages = (message, index) => {
+    const currentDate = new Date(message.createdAt);
+    const prevDate = index > 0 ? new Date(messages[index - 1].createdAt) : null;
+    const showDivider = !prevDate || !isSameDay(prevDate, currentDate); //show the divider if the days are different or it its the first message
+
+    return (
+      <div key={message._id || index} className={styles.messageWrapper}>
+        <span
+          style={{
+            textAlign: "center",
+            color: "grey",
+            fontSize: "0.9rem",
+          }}
+        >
+          {showDivider === true
+            ? isToday(currentDate)
+              ? "Today"
+              : isYesterday(currentDate)
+                : isSameWeek(currentDate)
+                  ? format(currentDate, "EEEE")
+                  : format(currentDate, "MMMM dd, yyyy")
+            : null}
+        </span>
+        <Message
+          isSender={user.username === message.sender.username}
+          ref={bottomTextMessageRef}
+          message={message}
+        />
+      </div>
+    );
+  };
 
   return (
     <div className={className}>
       <Header />
       <div className={styles.messageContainer}>
-        {messages?.map((message, index) => {
-          const currentDate = new Date(message.createdAt);
-          const prevDate =
-            index > 0 ? new Date(messages[index - 1].createdAt) : null;
-          const showDivider = !prevDate || !isSameDay(prevDate, currentDate); //show the divider if the days are different or it its the first message
-
-          return (
-            <div key={message._id || index} className={styles.messageWrapper}>
-              <span
-                style={{
-                  textAlign: "center",
-                  color: "grey",
-                  fontSize: "0.9rem",
-                }}
-              >
-                {showDivider === true
-                  ? isToday(currentDate)
-                    ? "Today"
-                    : isYesterday(currentDate)
-                    ? "Yesterday"
-                    : isSameWeek(currentDate)
-                    ? format(currentDate, "EEEE")
-                    : format(currentDate, "MMMM dd, yyyy")
-                  : null}
-              </span>
-              <Message
-                isSender={user.username === message.sender.username}
-                ref={bottomTextMessageRef}
-                message={message}
-              />
-            </div>
-          );
-        })}
+        {messages?.map(showMessages)}
       </div>
       {!isWelcomePage && currentChatId && <TextBar />}
     </div>
