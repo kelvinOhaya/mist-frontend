@@ -43,6 +43,7 @@ function Display({ className }) {
             ? isToday(currentDate)
               ? "Today"
               : isYesterday(currentDate)
+                ? "Yesterday"
                 : isSameWeek(currentDate)
                   ? format(currentDate, "EEEE")
                   : format(currentDate, "MMMM dd, yyyy")
