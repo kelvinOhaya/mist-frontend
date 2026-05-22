@@ -3,7 +3,7 @@ import styles from "../ChangeProfilePicture/ChangeProfilePicture.module.css";
 import { PlusIcon, PencilIcon } from "../../../../../general/icons";
 import useChatRoom from "../../../../../../contexts/chatRoom/useChatRoom";
 import { useDropzone } from "react-dropzone";
-import api from "../../../../../../utils/api";
+import api from "../../../../../../hooks/useApi";
 import GoBack from "../GoBack/GoBack";
 import { useContext } from "react";
 import DropdownContext from "../../Dropdown/DropdownContext";
@@ -20,8 +20,8 @@ function ChangeGroupProfilePicture() {
       acceptedFiles.map((file) =>
         Object.assign(file, {
           preview: URL.createObjectURL(file),
-        })
-      )
+        }),
+      ),
     );
   }, []);
   const handleSubmit = async (e) => {

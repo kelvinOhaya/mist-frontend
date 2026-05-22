@@ -3,11 +3,9 @@
     - functions for logging in, signing up, logging out, and getting user data
     - state variables for access tokens, the user data, and whether the screen is loading or not
 */
-import { useState, useEffect } from "react";
-import api, { injectAuthToken } from "../../utils/api";
+import { useState, useEffect, useRef } from "react";
 import AuthContext from "./AuthContext";
-import useChatRoom from "../chatRoom/useChatRoom";
-import { useNavigate } from "react-router-dom";
+import useApi from "../../hooks/useApi";
 
 const AuthProvider = ({ children }) => {
   //the tokens from the backend, the user data, and checking if the website is loading
@@ -16,7 +14,9 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const navigate = useNavigate();
+  const accessTokenRef = useRef(null);
+  const refreshTokenRef = useRef(null);
+  const { api, injectAuthToken } = useApi();
 
   // Helper function to set both tokens
   const setTokens = (newAccessToken, newRefreshToken) => {
@@ -24,10 +24,21 @@ const AuthProvider = ({ children }) => {
     setRefreshToken(newRefreshToken);
   };
 
-  //whenever the website mounts, set up the axios interceptors to always use the latest access token for a request
-  //if that doesn't work, just set these state variables to null
-  //regardless, set isLoading to false, signalling that the page can now render
   useEffect(() => {
+    accessTokenRef.current = accessToken;
+  }, [accessToken]);
+
+  useEffect(() => {
+    refreshTokenRef.current = refreshToken;
+  }, [refreshToken]);
+
+  useEffect(() => {
+    const cleanupInterceptors = injectAuthToken(
+      () => accessTokenRef.current,
+      setTokens,
+      () => refreshTokenRef.current || sessionStorage.getItem("refreshToken"),
+    );
+
     const refresh = async () => {
       try {
         // Try to get refresh token from sessionStorage on app start
@@ -55,13 +66,10 @@ const AuthProvider = ({ children }) => {
       }
     };
 
-    injectAuthToken(
-      () => accessToken,
-      setTokens,
-      () => refreshToken || sessionStorage.getItem("refreshToken")
-    );
     refresh();
-  }, [accessToken, refreshToken]);
+
+    return cleanupInterceptors;
+  }, []);
 
   //creates a user in mongodb and gets both access and refresh tokens
   const signUp = async (credentials, rememberMe) => {
@@ -103,7 +111,6 @@ const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       setIsLoggingOut(true);
-      navigate("/", { replace: true });
       await api.post("/auth/logout");
       localStorage.removeItem("refreshToken");
       console.log(`LOCAL STORAGE: ${localStorage.getItem("refreshToken")}`);

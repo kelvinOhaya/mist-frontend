@@ -2,12 +2,9 @@ import { useNavigate } from "react-router-dom";
 import styles from "./LoginSignUp.module.css";
 import { useEffect, useState } from "react";
 import useAuth from "../../contexts/auth/useAuth";
-import api from "../../utils/api";
+import api from "../../hooks/useApi";
 
 function SignUp({ setMode, rememberMe, setRememberMe }) {
-  const navigate = useNavigate();
-  const { signUp, refreshToken } = useAuth();
-
   const [userData, setUserData] = useState({
     username: "",
     password: "",

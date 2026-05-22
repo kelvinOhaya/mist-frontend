@@ -7,8 +7,6 @@ import useSocket from "../../contexts/socket/useSocket";
 import useAuth from "../../contexts/auth/useAuth";
 import ChatsTab from "../../components/chatRoomComponents/ChatsTab/ChatsTab";
 import Display from "../../components/chatRoomComponents/Display/Display";
-import { useLocation } from "react-router-dom";
-
 function ChatRoom() {
   const {
     loadChatRooms,
@@ -19,7 +17,6 @@ function ChatRoom() {
   const { isLoading, user, accessToken } = useAuth();
   const [activeGroupChat, setActiveGroupChat] = useState(0);
   const { socket } = useSocket();
-  const location = useLocation();
 
   useEffect(() => {
     if (!socket) return;

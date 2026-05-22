@@ -2,14 +2,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import styles from "./LogoutConfirmation.module.css";
 import useChatRoom from "../../../../../../contexts/chatRoom/useChatRoom";
 import useAuth from "../../../../../../contexts/auth/useAuth";
-import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import DropdownContext from "../../Dropdown/DropdownContext";
+import useActiveTab from "../../../../../../contexts/activeTab/useActiveTab";
 
 function LogoutConfirmation() {
   const { logout, setUser } = useAuth();
-  const navigate = useNavigate();
   const { closePanel } = useContext(DropdownContext);
+  const { navigate } = useActiveTab();
   const {
     setIsCreator,
     setChatRooms,
@@ -26,6 +26,7 @@ function LogoutConfirmation() {
     setUser(null);
     clearAllCache();
     await logout();
+    navigate("Home");
   };
 
   return (
@@ -35,7 +36,7 @@ function LogoutConfirmation() {
         <button type="button" onClick={() => closePanel()}>
           Nah, I'll Stay :)
         </button>
-        <button type="button" onClick={handleLogout}>
+        <button type="button" onClick={() => handleLogout()}>
           Yes I'll go :(
         </button>
       </div>

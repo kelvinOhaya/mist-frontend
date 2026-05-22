@@ -1,4 +1,4 @@
-import api from "../utils/api";
+import api from "./useApi";
 import useAuth from "../contexts/auth/useAuth";
 
 //send a post request to the login route and get both tokens

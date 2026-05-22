@@ -1,8 +1,8 @@
-import chatRoomContext from "./chatRoomContext";
+import ChatRoomContext from "./chatRoomContext";
 import { useState, useEffect } from "react";
 import useAuth from "../auth/useAuth";
 import useSocket from "../socket/useSocket";
-import api from "../../utils/api";
+import api from "../../hooks/useApi";
 import { useRef } from "react";
 
 function ChatRoomProvider({ children }) {
@@ -38,7 +38,7 @@ function ChatRoomProvider({ children }) {
 
   useEffect(
     () => console.log(`Is it Tablet?: ${isTablet}\nIs it Mobile?: ${isMobile}`),
-    [isTablet, isMobile]
+    [isTablet, isMobile],
   );
 
   //every time the room changes, add it to the cache
@@ -149,9 +149,9 @@ function ChatRoomProvider({ children }) {
         `Data from the change name socket event: \n ${JSON.stringify(
           data,
           null,
-          2
+          2,
         )}
-        )}`
+        )}`,
       );
       setChatRooms((prev) =>
         prev.map((room) =>
@@ -160,8 +160,8 @@ function ChatRoomProvider({ children }) {
                 ...room,
                 name: newName,
               }
-            : room
-        )
+            : room,
+        ),
       );
     };
 
@@ -169,7 +169,7 @@ function ChatRoomProvider({ children }) {
       const { foundUserId, newProfilePicture } = data;
 
       console.log(
-        `Data from the update-profile-picture socket event\nFound user ID: ${foundUserId}\nNew Profile Picture Object: ${newProfilePicture}`
+        `Data from the update-profile-picture socket event\nFound user ID: ${foundUserId}\nNew Profile Picture Object: ${newProfilePicture}`,
       );
 
       //update DMs with the person who changed their profile Picture as the other user to have the new profile picture
@@ -183,8 +183,8 @@ function ChatRoomProvider({ children }) {
                   profilePicture: newProfilePicture,
                 },
               }
-            : room
-        )
+            : room,
+        ),
       );
 
       //update messages to have the new picture if they are from the user that changed their profile
@@ -198,8 +198,8 @@ function ChatRoomProvider({ children }) {
                   profilePicture: newProfilePicture,
                 },
               }
-            : message
-        )
+            : message,
+        ),
       );
     };
 
@@ -207,13 +207,13 @@ function ChatRoomProvider({ children }) {
       const { roomId, newProfilePicture } = data;
       console.log(
         "Data for new profile picture: \n",
-        JSON.stringify(data, null, 2)
+        JSON.stringify(data, null, 2),
       );
       setChatRooms((prev) => {
         return prev.map((room) =>
           room._id === roomId
             ? { ...room, profilePicture: newProfilePicture }
-            : room
+            : room,
         );
       });
       setCurrentChatId(roomId);
@@ -232,8 +232,8 @@ function ChatRoomProvider({ children }) {
         prev.map((room) =>
           room._id === data.updatedRoomId
             ? { ...room, memberCount: room.memberCount + 1 }
-            : room
-        )
+            : room,
+        ),
       );
     };
 
@@ -244,8 +244,8 @@ function ChatRoomProvider({ children }) {
         prev.map((room) =>
           room._id === roomId
             ? { ...room, memberCount: room.memberCount - 1 }
-            : room
-        )
+            : room,
+        ),
       );
     };
 
@@ -309,7 +309,7 @@ function ChatRoomProvider({ children }) {
 
   const checkIfDmExists = (joinCode) => {
     const dmExists = chatRooms.find(
-      (room) => room.otherUser?.joinCode === joinCode && room.isDm === true
+      (room) => room.otherUser?.joinCode === joinCode && room.isDm === true,
     );
     return dmExists ? true : false;
   };
@@ -400,7 +400,7 @@ function ChatRoomProvider({ children }) {
   };
 
   return (
-    <chatRoomContext.Provider
+    <ChatRoomContext.Provider
       value={{
         messagesCache,
         updateMessagesCache,
@@ -434,7 +434,7 @@ function ChatRoomProvider({ children }) {
       }}
     >
       {children}
-    </chatRoomContext.Provider>
+    </ChatRoomContext.Provider>
   );
 }
 

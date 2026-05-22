@@ -1,11 +1,10 @@
-import { useNavigate, useLocation } from "react-router-dom";
 import LoadingIcon from "../components/general/LoadingIcon/LoadingIcon";
+import useActiveTab from "../contexts/activeTab/useActiveTab";
 import useAuth from "../contexts/auth/useAuth";
 
 const ProtectedRoute = ({ children }) => {
   const { user, isLoading, accessToken, isLoggingOut } = useAuth();
-  const navigate = useNavigate();
-
+  const { navigate } = useActiveTab();
   console.log("ProtectedRoute render:", {
     user,
     isLoading,
@@ -28,7 +27,7 @@ const ProtectedRoute = ({ children }) => {
   } else {
     if (!user && !isLoggingOut) {
       console.log("ProtectedRoute: no access token, redirecting");
-      navigate("/register");
+      navigate("Auth");
     } else return children;
   }
 };

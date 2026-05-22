@@ -1,29 +1,38 @@
 @import url("variables.css");
+@import "tailwindcss";
 
 * {
-  margin: 0;
-  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
   box-sizing: border-box;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  text-overflow: ellipsis;
 }
 
-/* Ensure full mobile coverage */
 html,
 body {
-  position: fixed;
-  /* top: -60px; */
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  padding: 0;
-  /* Use dynamic viewport units for mobile */
-  /* Prevent mobile browser zooming */
-  background: var(--dark-primary);
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 #root {
-  width: 100%;
-  height: 100dvh;
+  height: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
 }
+
+.inputField:-webkit-autofill,
+.inputField:-webkit-autofill:hover,
+.inputField:-webkit-autofill:focus {
+  color: var(--p100);
+  -webkit-text-fill-color: var(--p100);
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+.inputField {
+  color: var(--p100);
+  caret-color: var(--p100);
+}
+
+/* stylelint-disable at-rule-no-unknown */
+@custom-variant dark (&:where(.dark, .dark *));
+/* stylelint-enable at-rule-no-unknown */

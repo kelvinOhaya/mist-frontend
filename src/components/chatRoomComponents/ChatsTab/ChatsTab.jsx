@@ -2,7 +2,7 @@
 import UserLabel from "../../general/UserLabel/UserLabel";
 import UserPortion from "./UserPortion/UserPortion";
 import styles from "./ChatsTab.module.css";
-import useChatRoom from "../../../contexts/chatRoom/useChatRoom";
+import useChatRoom from "@contexts/chatRoom/useChatRoom";
 import { MenuIconVertical } from "../../general/icons";
 
 // ChatsTab displays the list of chat rooms the user is a member of, and allows switching between them
@@ -56,8 +56,8 @@ function ChatsTab({ className, setSidebarIsOpen }) {
                         chatRoom.isDm
                           ? chatRoom.otherUser?.profilePicture?.url || null
                           : chatRoom.profilePicture?.url
-                          ? chatRoom.profilePicture.url
-                          : null
+                            ? chatRoom.profilePicture.url
+                            : null
                       }
                       orientation={"horizontal"}
                     />

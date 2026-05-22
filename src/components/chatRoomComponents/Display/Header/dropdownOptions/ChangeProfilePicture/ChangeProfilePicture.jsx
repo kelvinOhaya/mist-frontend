@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PencilIcon, PlusIcon } from "../../../../../general/icons";
 import useAuth from "../../../../../../contexts/auth/useAuth";
 import { useDropzone } from "react-dropzone";
-import api from "../../../../../../utils/api";
+import { useApi } from "../../../../../../hooks/useApi";
 import DropdownContext from "../../Dropdown/DropdownContext";
 import GoBack from "../GoBack/GoBack";
 
@@ -20,8 +20,8 @@ function ChangeProfilePicture() {
       acceptedFiles.map((file) =>
         Object.assign(file, {
           preview: URL.createObjectURL(file),
-        })
-      )
+        }),
+      ),
     );
   }, []);
 
@@ -46,7 +46,7 @@ function ChangeProfilePicture() {
       if (error && error.response && error.response.data) {
         console.log(
           "Error from the server when trying to upload to cloudinary: ",
-          error.response.data
+          error.response.data,
         );
       }
     } finally {

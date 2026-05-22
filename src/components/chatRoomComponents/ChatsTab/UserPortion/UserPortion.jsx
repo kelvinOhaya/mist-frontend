@@ -1,6 +1,6 @@
 import styles from "./UserPortion.module.css";
 import UserLabel from "../../../general/UserLabel/UserLabel";
-import useAuth from "../../../../contexts/auth/useAuth";
+import useAuth from "@contexts/auth/useAuth";
 
 function UserPortion({ className }) {
   const { user } = useAuth();
