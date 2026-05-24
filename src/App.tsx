@@ -1,12 +1,7 @@
 import AppRoutes from "./AppRoutes";
-import ActiveTabProvider from "@contexts/activeTab/ActiveTabProvider";
-
+import "semantic-ui-css/semantic.min.css";
 function App() {
-  return (
-    <ActiveTabProvider>
-      <AppRoutes />
-    </ActiveTabProvider>
-  );
+  return <AppRoutes />;
 }
 
 export default App;

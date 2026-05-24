@@ -3,10 +3,10 @@ import styles from "../ChangeProfilePicture/ChangeProfilePicture.module.css";
 import { PlusIcon, PencilIcon } from "../../../../../general/icons";
 import useChatRoom from "../../../../../../contexts/chatRoom/useChatRoom";
 import { useDropzone } from "react-dropzone";
-import api from "../../../../../../hooks/useApi";
 import GoBack from "../GoBack/GoBack";
 import { useContext } from "react";
 import DropdownContext from "../../Dropdown/DropdownContext";
+import { uploadGroupProfilePicture } from "../../../../../../../api/uploadApi";
 
 function ChangeGroupProfilePicture() {
   const { currentChat } = useChatRoom();
@@ -32,9 +32,7 @@ function ChangeGroupProfilePicture() {
     formData.append("image", preview[0]);
     formData.append("roomId", currentChat._id);
     try {
-      await api.post("/upload/group-profile-picture", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await uploadGroupProfilePicture(formData);
     } catch (error) {
       if (error && error.response && error.response.data) {
         // console.log(

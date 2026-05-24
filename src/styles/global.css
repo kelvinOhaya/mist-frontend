@@ -9,14 +9,18 @@
 html,
 body {
   height: 100%;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
   overscroll-behavior: none;
+  background: linear-gradient(to bottom, var(--p600), var(--p300));
 }
 
 #root {
   height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
+  background: linear-gradient(to bottom, var(--p600), var(--p300));
 }
 
 .inputField:-webkit-autofill,

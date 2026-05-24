@@ -1,12 +1,22 @@
 import ChatRoomContext from "./chatRoomContext";
 import { useState, useEffect } from "react";
-import useAuth from "../auth/useAuth";
 import useSocket from "../socket/useSocket";
-import api from "../../hooks/useApi";
 import { useRef } from "react";
+import {
+  changeRoomName as changeRoomNameRequest,
+  createGroup as createGroupRequest,
+  fetchChatRoomInfo,
+  findUser as findUserRequest,
+  joinRoom as joinRoomRequest,
+  leaveRoom as leaveRoomRequest,
+  loadMessages as loadMessagesRequest,
+  updateCurrentRoom as updateCurrentRoomRequest,
+  verifyJoinCode as verifyJoinCodeRequest,
+} from "@api/chatRoomApi";
+import useAuthLogic from "@hooks/useAuthLogic";
 
 function ChatRoomProvider({ children }) {
-  const { user } = useAuth();
+  const { user } = useAuthLogic();
   const { socket } = useSocket();
   const [isCreator, setIsCreator] = useState(null);
   const [chatRooms, setChatRooms] = useState([]);
@@ -59,15 +69,12 @@ function ChatRoomProvider({ children }) {
     setIsCreator(user._id === element.creator);
 
     //save the current chat to mongoDB
-    await api.put("/chatroom/update-current-room", {
-      currentRoomId: element._id,
-      socketId: socket.id,
-    });
+    await updateCurrentRoomRequest(element._id, socket.id);
   };
 
   const loadChatRooms = async () => {
     try {
-      const { data } = await api.get("/chatroom/send-info");
+      const data = await fetchChatRoomInfo();
 
       data.chatRooms.map((chatRoom) => {
         if (chatRoom.isDm === true) {
@@ -77,38 +84,12 @@ function ChatRoomProvider({ children }) {
 
       setChatRooms(data.chatRooms);
       setCurrentChatId(data.currentChat._id);
-    } catch (error) {
-      if (error.response && error.response.status == 401) {
+    } catch (_error) {
+      if (_error.response && _error.response.status == 401) {
         // console.log("Error trying to load the chat rooms: ", error);
       }
     }
   };
-
-  const loadMessages = async () => {
-    //check for cache first
-    if (messagesCache && messagesCache[currentChatId]) {
-      setMessages(messagesCache[currentChatId]); //set the messages state to the cache object with the matching currentChatId key
-      return;
-    }
-
-    try {
-      console.log("Loading messages from API"); // Debug log
-      const { data } = await api.post("/chatroom/load-messages", {
-        currentChatId,
-      });
-
-      setMessages(data.messages);
-
-      //cache the loaded messages using currentChat as the key
-      updateMessagesCache(currentChatId, data.messages);
-    } catch (error) {
-      //console.log("Error loading all the messages: ", error);
-    }
-  };
-
-  useEffect(() => {
-    if (!currentChat) return;
-  }, [currentChat]);
 
   //join a room when a chat is selected
   useEffect(() => {
@@ -118,7 +99,7 @@ function ChatRoomProvider({ children }) {
       prevRoom: prevRoomId.current,
       newRoom: currentChat._id,
     });
-  }, [currentChat]);
+  }, [currentChat, socket]);
 
   const clearAllCache = () => {
     setMessagesCache(null);
@@ -274,31 +255,39 @@ function ChatRoomProvider({ children }) {
       socket.off("increase-member-count", handleIncreaseMemberCount);
       socket.off("decrease-member-count", handleDecreaseMemberCount);
     };
-  }, [socket, user, chatRooms, messages]);
+  }, [socket, user, chatRooms, messages, currentChatId]);
 
   //initial load of all chatRooms and messages
 
   useEffect(() => {
+    if (!currentChat) return;
+
     const getLoadedMessages = async () => {
-      if (!currentChat) return;
-      await loadMessages();
+      try {
+        const messages = await loadMessagesRequest(currentChatId);
+
+        setMessages(messages);
+
+        //cache the loaded messages using currentChat as the key
+        updateMessagesCache(currentChatId, messages);
+      } catch {
+        //console.log("Error loading all the messages: ");
+      }
     };
+
     getLoadedMessages();
-  }, [currentChat]);
+  }, [currentChat, currentChatId]);
 
   useEffect(() => {
     if (!currentChat) return;
 
-    setIsCreator(user._id === currentChat.creator);
-  }, [currentChat]);
+    setIsCreator(user?._id === currentChat.creator);
+  }, [currentChat, user]);
 
   const verifyJoinCode = async (joinCode) => {
     try {
-      const { data } = await api.post("/chatRoom/verify-join-code", {
-        joinCode,
-      });
-      return data.isValid;
-    } catch (error) {
+      return await verifyJoinCodeRequest(joinCode);
+    } catch {
       //console.log("Error trying to verify join codes: ", error);
     }
   };
@@ -321,34 +310,29 @@ function ChatRoomProvider({ children }) {
         Send a post request with the following join code
         Expected data object: {newRoom: the new chat room}
       */
-      const { data } = await api.post("/chatRoom/join", { joinCode });
+      const newRoom = await joinRoomRequest(joinCode);
       //console.log(`Here is your new room: \n${data.newRoom}`);
-      setChatRooms((prev) => (prev ? [...prev, data.newRoom] : [data.newRoom]));
-    } catch (error) {
+      setChatRooms((prev) => (prev ? [...prev, newRoom] : [newRoom]));
+    } catch {
       //console.log("Error trying to verify join codes: ", error);
     }
   };
 
   const createGroup = async (groupName) => {
-    const { data } = await api.post("/chatroom/", {
-      senderId: user._id,
-      name: groupName,
-    });
+    const newRoom = await createGroupRequest(user._id, groupName);
     if (chatRooms != null) {
-      setChatRooms([...chatRooms, data.newRoom]);
+      setChatRooms([...chatRooms, newRoom]);
     } else {
-      setChatRooms([data.newRoom]);
+      setChatRooms([newRoom]);
     }
-    setCurrentChatId(data.newRoom._id);
+    setCurrentChatId(newRoom._id);
   };
 
   //send a delete request to "chatroom/leave-room"
   const leaveChatRoom = async () => {
     if (!currentChatId) return;
     try {
-      await api.delete("/chatroom/leave-room", {
-        data: { currentRoomId: currentChatId },
-      });
+      await leaveRoomRequest(currentChatId);
       //send an event to leave the current socket room
       socket.emit("leave-room", { currentRoomId: currentChatId });
       //filter out the old chat room
@@ -356,7 +340,7 @@ function ChatRoomProvider({ children }) {
       //set currentChat and messages to null
       setCurrentChatId(null);
       setMessages(null);
-    } catch (error) {
+    } catch {
       //console.log("Error leaving chat room: ", error);
     }
   };
@@ -372,16 +356,16 @@ function ChatRoomProvider({ children }) {
   const changeName = async (newName) => {
     //send put request to update name in mongoose
     try {
-      const { data } = await api.put("/chatroom/change-name", {
-        newName: newName,
-        currentRoomId: currentChat._id,
-      });
+      const foundChatRoom = await changeRoomNameRequest(
+        newName,
+        currentChat._id,
+      );
 
       //if all went well, emit a socket event to update EVERYONE's frontend
-      socket.emit("change-room-name", data.foundChatRoom);
+      socket.emit("change-room-name", foundChatRoom);
 
       //if all went well, update the frontend accordingly
-    } catch (error) {
+    } catch {
       //console.log("Error trying to update the names: ", error);
     }
   };
@@ -390,13 +374,10 @@ function ChatRoomProvider({ children }) {
   make an api call to the "/chatroom/find-user"
   */
   const findUser = async (joinCode) => {
-    const { data } = await api.post("/chatroom/find-user", {
-      joinCode,
-      socketId: socket.id,
-    });
+    const newRoom = await findUserRequest(joinCode, socket.id);
     //log the new room for proof the new room got to the client
     // console.log("NEW ROOM: \n", data.newRoom);
-    setChatRooms((prev) => [...prev, data.newRoom]);
+    setChatRooms((prev) => [...prev, newRoom]);
   };
 
   return (

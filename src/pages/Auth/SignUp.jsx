@@ -1,61 +1,17 @@
-import { useNavigate } from "react-router-dom";
+import useSignup from "@hooks/useSignup";
 import styles from "./LoginSignUp.module.css";
-import { useEffect, useState } from "react";
-import useAuth from "../../contexts/auth/useAuth";
-import api from "../../hooks/useApi";
 
 function SignUp({ setMode, rememberMe, setRememberMe }) {
-  const [userData, setUserData] = useState({
-    username: "",
-    password: "",
-    hasErrors: false,
-  });
-
-  const [confirmedPassword, setConfirmedPassword] = useState("");
-  const [errors, setErrors] = useState({
-    fieldsAreEmpty: false,
-    passwordsDoNotMatch: false,
-    passwordUnderEightCharacters: false,
-    usernameIsAlreadyTaken: false,
-  });
-
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    const { username, password } = userData;
-
-    //verify inputs
-    try {
-      const { data } = await api.post("/auth/verify-signup", {
-        username: username.trim(),
-        password,
-        confirmedPassword,
-      });
-
-      const newErrors = data.newErrors;
-
-      if (
-        newErrors.fieldsAreEmpty ||
-        newErrors.passwordsDoNotMatch ||
-        newErrors.passwordUnderEightCharacters ||
-        newErrors.usernameIsAlreadyTaken
-      ) {
-        setErrors(newErrors);
-        return;
-      }
-    } catch (error) {
-      //console.log("Error verifying signup form: ", error);
-    }
-
-    const signUpStatus = await signUp({ username, password }, rememberMe);
-    console.log(`Status: ${signUpStatus}`);
-    if (signUpStatus === 200) {
-      const last = "/chatroom";
-      navigate(last);
-    } else return;
-
-    // navigate("/chatroom");
-  };
-
+  const {
+    handleSignUp,
+    username,
+    setUsername,
+    password,
+    setPassword,
+    confirmedPassword,
+    setConfirmedPassword,
+    generalError,
+  } = useSignup();
   return (
     <section className={styles.container}>
       <h1>Sign Up</h1>

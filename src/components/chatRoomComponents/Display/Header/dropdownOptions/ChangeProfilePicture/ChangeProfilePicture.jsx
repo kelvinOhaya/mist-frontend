@@ -1,12 +1,12 @@
 import { useState, useCallback, useRef, useContext } from "react";
 import styles from "./ChangeProfilePicture.module.css";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { PencilIcon, PlusIcon } from "../../../../../general/icons";
 import useAuth from "../../../../../../contexts/auth/useAuth";
 import { useDropzone } from "react-dropzone";
-import { useApi } from "../../../../../../hooks/useApi";
 import DropdownContext from "../../Dropdown/DropdownContext";
 import GoBack from "../GoBack/GoBack";
+import { uploadProfilePicture } from "../../../../../../../api/uploadApi";
 
 function ChangeProfilePicture() {
   const { user, setUser } = useAuth();
@@ -35,12 +35,10 @@ function ChangeProfilePicture() {
       for (const [key, value] of formData.entries()) {
         console.log(`${key}: ${value}`);
       }
-      const { data } = await api.post("/upload/profile-picture", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const newProfilePicture = await uploadProfilePicture(formData);
 
       setIsLoading(false);
-      setUser((prev) => ({ ...prev, profilePicture: data.newProfilePicture }));
+      setUser((prev) => ({ ...prev, profilePicture: newProfilePicture }));
       setIsSuccessful(true);
     } catch (error) {
       if (error && error.response && error.response.data) {

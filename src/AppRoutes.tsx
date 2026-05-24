@@ -1,63 +1,78 @@
 import Home from "./pages/Home/Home";
 import Auth from "./pages/Auth/Auth";
 import ChatRoom from "./pages/ChatRoom/ChatRoom";
-import ProtectedRoute from "./routes/ProtectedRoute";
+import ProtectedRoute from "@routes/ProtectedRoute";
 import ChatRoomProvider from "@contexts/chatRoom/ChatRoomProvider";
 import SocketProvider from "@contexts/socket/SocketProvider";
 import AuthProvider from "@contexts/auth/AuthProvider";
-import useActiveTab from "@contexts/activeTab/useActiveTab";
-import { ReactNode, useState } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { ReactNode, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 function AppRoutes() {
-  const activeTab = useActiveTab()?.activeTab ?? "Home";
+  const location = useLocation();
+  const [isInitialRouteRender, setIsInitialRouteRender] = useState(true);
   const [animationsPlayed, setAnimationsPlayed] = useState<number>(0);
+
+  useEffect(() => {
+    setIsInitialRouteRender(false);
+  }, []);
+
   return (
-    <div className="fixed inset-0 overflow-hidden overscroll-none">
+    <div className="fixed inset-0 overflow-hidden overscroll-none bg-linear-to-b from-(--p600) to-(--p300)">
       <AnimatePresence mode="sync">
-        {activeTab === "Home" ? (
-          <motion.div
-            key="home"
-            className="absolute inset-0"
-            initial={{
-              x: animationsPlayed === 0 && activeTab === "Home" ? 0 : "-100vw",
-            }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100vw" }}
-            transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
-          >
-            <Home
-              animationsPlayed={animationsPlayed}
-              setAnimationsPlayed={setAnimationsPlayed}
-            />
-          </motion.div>
-        ) : activeTab === "Login" ? (
-          <motion.div
-            key="login"
-            className="absolute inset-0"
-            initial={{ x: animationsPlayed === 0 ? 0 : "100vw" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100vw" }}
-            transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
-          >
-            <AuthWrapper>
-              <Auth />
-            </AuthWrapper>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="chatroom"
-            className="absolute inset-0"
-            initial={{ x: animationsPlayed === 0 ? 0 : "100vw" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100vw" }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
-          >
-            <ChatRoomWrapper>
-              <ChatRoom />
-            </ChatRoomWrapper>
-          </motion.div>
-        )}
+        <Routes location={location} key={location.pathname}>
+          <Route
+            path="/"
+            element={
+              <motion.div
+                className="absolute inset-0"
+                initial={{ x: isInitialRouteRender ? 0 : "-100vw" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100vw" }}
+                transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+              >
+                <Home
+                  animationsPlayed={animationsPlayed}
+                  setAnimationsPlayed={setAnimationsPlayed}
+                />
+              </motion.div>
+            }
+          />
+          <Route
+            path="/auth"
+            element={
+              <motion.div
+                className="absolute inset-0"
+                initial={{ x: isInitialRouteRender ? 0 : "100vw" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100vw" }}
+                transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+              >
+                <AuthWrapper>
+                  <Auth />
+                </AuthWrapper>
+              </motion.div>
+            }
+          />
+          <Route
+            path="/chatroom"
+            element={
+              <motion.div
+                className="absolute inset-0"
+                initial={{ x: isInitialRouteRender ? 0 : "100vw" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100vw" }}
+                transition={{ duration: 0.35, ease: "easeInOut" }}
+              >
+                <ChatRoomWrapper>
+                  <ChatRoom />
+                </ChatRoomWrapper>
+              </motion.div>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </AnimatePresence>
     </div>
   );

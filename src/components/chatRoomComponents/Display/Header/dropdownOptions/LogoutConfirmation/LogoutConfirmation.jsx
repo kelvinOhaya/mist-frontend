@@ -1,15 +1,14 @@
-import { motion, AnimatePresence } from "framer-motion";
 import styles from "./LogoutConfirmation.module.css";
 import useChatRoom from "../../../../../../contexts/chatRoom/useChatRoom";
 import useAuth from "../../../../../../contexts/auth/useAuth";
 import { useContext } from "react";
 import DropdownContext from "../../Dropdown/DropdownContext";
-import useActiveTab from "../../../../../../contexts/activeTab/useActiveTab";
+import { useNavigate } from "react-router-dom";
 
 function LogoutConfirmation() {
   const { logout, setUser } = useAuth();
+  const navigate = useNavigate();
   const { closePanel } = useContext(DropdownContext);
-  const { navigate } = useActiveTab();
   const {
     setIsCreator,
     setChatRooms,
@@ -26,7 +25,7 @@ function LogoutConfirmation() {
     setUser(null);
     clearAllCache();
     await logout();
-    navigate("Home");
+    navigate("/");
   };
 
   return (

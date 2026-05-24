@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import Footer from "./Footer";
 import AnimatedTitle from "./AnimatedTitle";
 import Background from "./Background";
-import useActiveTab from "../../contexts/activeTab/useActiveTab";
 
 interface HomeProps {
   animationsPlayed: number;
@@ -10,13 +10,16 @@ interface HomeProps {
 }
 
 function Home({ animationsPlayed, setAnimationsPlayed }: HomeProps) {
-  const { navigate } = useActiveTab();
+  const navigate = useNavigate();
 
   return (
-    <div className="absolute top-0 left-0 w-full h-full flex flex-col z-99 overflow-hidden items-center bg-linear-to-b from-(--p600) to-(--p300)">
+    <div
+      className="fixed flex felx-col top-0 left-0 w-full h-full z-99 overflow-hidden items-center
+    justify-center bg-linear-to-b from-(--p600) to-(--p300)"
+    >
       <Background />
       {/* Contains all texts and icons */}
-      <main className="flex-1 flex flex-col text-center justify-center items-center border-radius-20">
+      <main className=" flex flex-col text-center items-center justify-center">
         {/* Title and description */}
         <AnimatedTitle animationsPlayed={animationsPlayed} />
         <motion.p
@@ -43,7 +46,9 @@ function Home({ animationsPlayed, setAnimationsPlayed }: HomeProps) {
               setAnimationsPlayed(1);
             }
           }}
-          onClick={() => navigate("Login")}
+          onClick={() => {
+            navigate("/auth");
+          }}
         >
           <p className="font-medium text-xl ">Get Started</p>
         </motion.button>

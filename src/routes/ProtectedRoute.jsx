@@ -1,14 +1,14 @@
 import LoadingIcon from "../components/general/LoadingIcon/LoadingIcon";
-import useActiveTab from "../contexts/activeTab/useActiveTab";
-import useAuth from "../contexts/auth/useAuth";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import useAuthLogic from "@hooks/useAuthLogic";
 
 const ProtectedRoute = ({ children }) => {
-  const { user, isLoading, accessToken, isLoggingOut } = useAuth();
-  const { navigate } = useActiveTab();
+  const { user, isLoading, isLoggingOut } = useAuthLogic();
+  const navigate = useNavigate();
   console.log("ProtectedRoute render:", {
     user,
     isLoading,
-    accessToken,
   });
 
   const loadingStyle = {
@@ -18,18 +18,26 @@ const ProtectedRoute = ({ children }) => {
     left: "50%",
   };
 
+  useEffect(() => {
+    if (!isLoading && !user && !isLoggingOut) {
+      console.log("ProtectedRoute: no access token, redirecting");
+      navigate("/auth", { replace: true });
+    }
+  }, [isLoading, user, isLoggingOut, navigate]);
+
   if (isLoading) {
     return (
       <div style={loadingStyle}>
         <LoadingIcon />
       </div>
     );
-  } else {
-    if (!user && !isLoggingOut) {
-      console.log("ProtectedRoute: no access token, redirecting");
-      navigate("Auth");
-    } else return children;
   }
+
+  if (!user && !isLoggingOut) {
+    return null;
+  }
+
+  return children;
 };
 
 export default ProtectedRoute;

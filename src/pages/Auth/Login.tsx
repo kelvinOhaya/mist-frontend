@@ -1,11 +1,10 @@
 import styles from "./LoginSignUp.module.css";
-import { useState, useRef } from "react";
-import { motion } from "framer-motion";
-import useAuth from "../../contexts/auth/useAuth";
+import { AnimatePresence, motion } from "framer-motion";
 import InputField from "@components/InputField";
 import { Checkmark } from "react-checkmark";
-import { colorMap } from "../../utils/colors";
-import useActiveTab from "../../contexts/activeTab/useActiveTab";
+import { colorMap } from "@utils/colors";
+import useLogin from "@hooks/useLogin";
+import Loader from "@components/Loader";
 
 interface LoginProps {
   setMode: React.Dispatch<React.SetStateAction<string>>;
@@ -14,69 +13,50 @@ interface LoginProps {
 }
 
 function Login({ setMode, rememberMe, setRememberMe }: LoginProps) {
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  // possible states: "incorrect credentials"
-  const [error, setError] = useState("");
-
-  const { login } = useAuth();
-  const { navigate } = useActiveTab();
-  const submittingRef = useRef(false);
-
   //handles the state for logging in
-  const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    e.stopPropagation(); // Prevent event bubbling
-
-    // Prevent multiple submissions
-    if (submittingRef.current) return;
-    submittingRef.current = true;
-
-    try {
-      console.log("Calling login...");
-      const loginStatus = await login({ username, password }, rememberMe);
-      console.log("Login response:", loginStatus);
-      if (loginStatus === 200) {
-        console.log("Login successful, navigating...");
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        navigate("Chatroom");
-      } else {
-        console.log("Login failed:", loginStatus);
-        loginStatus == 500
-          ? setError("server error")
-          : setError("incorrect credentials");
-      }
-    } catch (error) {
-      console.log("Login error:", error);
-      setError("network error");
-    } finally {
-      submittingRef.current = false;
-    }
-  };
+  const {
+    handleLogin,
+    username,
+    setUsername,
+    usernameIsValid,
+    setUsernameIsValid,
+    password,
+    setPassword,
+    passwordIsValid,
+    setPasswordIsValid,
+    error,
+    loadingState,
+  } = useLogin();
+  const inputsAreValid: boolean = usernameIsValid && passwordIsValid;
 
   return (
-    <div className="rounded-3xl absolute top-1/2 left-1/2 transform-[translate(-50%,-50%)] flex flex-col w-full px-8 items-center bg-(--p100), border-radius-5 ">
+    <div className="rounded-3xl absolute top-1/2 left-1/2 transform-[translate(-50%,-50%)] flex flex-col px-8 items-center bg-(--p100), border-radius-5 xs:w-[90vw] w-[320px] max-w-[320px] min-w-[320px]">
       <h1 className="py-5 text-(--p100) text-3xl text-center">Welcome Back</h1>
-      <form className="flex flex-col " onSubmit={(e) => handleLogin(e)}>
+      <form
+        className="flex flex-col "
+        onSubmit={(e) => handleLogin(e, rememberMe)}
+      >
         <InputField
           id={"username"}
           placeholder="username"
           type="text"
-          errorMsg="Incorrect username"
           value={username}
-          onChange={(
-            e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>,
-          ) => setUsername(e.target.value)}
-          validator={() => 1 + 1 === 2}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setUsername(e.target.value)
+          }
+          setValue={setUsername}
+          setEnableFlag={setUsernameIsValid}
+          neutralOnValid
         />
         <InputField
           id={"password"}
-          placeholder="username"
+          placeholder="password"
           type="password"
           value={password}
-          errorMsg="Invalid password"
-          validator={() => 1 + 1 !== 2}
+          setValue={setPassword}
           onChange={(e) => setPassword(e.target.value)}
+          setEnableFlag={setPasswordIsValid}
+          neutralOnValid
         />
 
         {error == "incorrect credentials" && (
@@ -89,9 +69,12 @@ function Login({ setMode, rememberMe, setRememberMe }: LoginProps) {
         )}
         <motion.button
           type="submit"
-          className="bg-(--p100) text-(--p600) rounded-xl py-2 my-3 hover:cursor-pointer"
+          className="bg-(--p100) text-(--p600) rounded-xl py-2  my-3! hover:cursor-pointer"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          animate={{ opacity: inputsAreValid ? 1 : 0.3 }}
+          transition={{ duration: 0.3 }}
+          disabled={!inputsAreValid}
         >
           LOGIN
         </motion.button>
@@ -122,6 +105,46 @@ function Login({ setMode, rememberMe, setRememberMe }: LoginProps) {
           </button>
         </span>
       </form>
+
+      <div style={{ opacity: loadingState === null ? 0 : 1 }}>
+        <div className="flex gap-2 text-(--p100) items-center">
+          {loadingState !== "error" && (
+            <div className="flex items-center gap-2">
+              <motion.span
+                animate={{
+                  color:
+                    loadingState === "success"
+                      ? colorMap.success
+                      : colorMap.neutral,
+                }}
+              >
+                Authenticating
+              </motion.span>{" "}
+              {loadingState === "loading" ? (
+                <Loader size={12} color={colorMap.p100} />
+              ) : loadingState === "success" ? (
+                <Checkmark size={12} />
+              ) : null}
+            </div>
+          )}
+
+          <AnimatePresence>
+            {loadingState === "error" && (
+              <motion.div
+                initial={{ x: -10 }}
+                animate={{ x: [0, -10, 10, -8, 8, -4, 4, 0] }}
+                transition={{
+                  duration: 0.45,
+                  ease: "easeInOut",
+                }}
+                className="flex gap-2 text-(--error)"
+              >
+                <span>{error}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
     </div>
   );
 }
