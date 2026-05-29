@@ -8,6 +8,7 @@ import AuthProvider from "@contexts/auth/AuthProvider";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { ReactNode, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { slideTiming } from "@utils/animationTiming";
 
 function AppRoutes() {
   const location = useLocation();
@@ -30,7 +31,7 @@ function AppRoutes() {
                 initial={{ x: isInitialRouteRender ? 0 : "-100vw" }}
                 animate={{ x: 0 }}
                 exit={{ x: "-100vw" }}
-                transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+                transition={{ duration: 0.3, ease: slideTiming as any }}
               >
                 <Home
                   animationsPlayed={animationsPlayed}
@@ -47,7 +48,7 @@ function AppRoutes() {
                 initial={{ x: isInitialRouteRender ? 0 : "100vw" }}
                 animate={{ x: 0 }}
                 exit={{ x: "-100vw" }}
-                transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+                transition={{ duration: 0.3, ease: slideTiming as any }}
               >
                 <AuthWrapper>
                   <Auth />
@@ -56,7 +57,7 @@ function AppRoutes() {
             }
           />
           <Route
-            path="/chatroom"
+            path="/dashboard"
             element={
               <motion.div
                 className="absolute inset-0"
@@ -71,6 +72,7 @@ function AppRoutes() {
               </motion.div>
             }
           />
+          <Route path="/chatroom" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>

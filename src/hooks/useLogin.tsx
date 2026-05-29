@@ -7,6 +7,7 @@ function useLogin() {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [usernameIsValid, setUsernameIsValid] = useState<boolean>(false);
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [passwordIsValid, setPasswordIsValid] = useState<boolean>(false);
   const [loadingState, setLoadingState] = useState<
     "loading" | "success" | "error" | null
@@ -28,17 +29,14 @@ function useLogin() {
     submittingRef.current = true;
 
     try {
-      console.log("Calling login...");
       const loginStatus = await login({ username, password }, rememberMe);
-      console.log("Login response:", loginStatus);
+
       if (loginStatus === 200) {
-        console.log("Login successful, navigating...");
         setLoadingState("success");
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        navigate("/chatroom");
-      } else {
-        console.log("Login failed:", loginStatus);
+        navigate("/dashboard");
+        return;
       }
+
       if (loginStatus == 401) {
         setError("invalid username or password");
         setLoadingState("error");
@@ -47,7 +45,6 @@ function useLogin() {
         setLoadingState("error");
       }
     } catch (error) {
-      console.log("Login error:", error);
       setError("an error occured on our part");
       setLoadingState("error");
     } finally {
@@ -65,6 +62,8 @@ function useLogin() {
     passwordIsValid,
     setPasswordIsValid,
     loadingState,
+    rememberMe,
+    setRememberMe,
     error,
   };
 }

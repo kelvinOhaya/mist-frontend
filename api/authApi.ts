@@ -16,7 +16,7 @@ export interface checkIfUsernameExistsErrors {
 export async function checkIfUsernameExists(credentials: { username: string }) {
   const { data } = await api.post("/auth/verify-signup", credentials);
 
-  return data.checkIfUsernameExists;
+  return data.usernameExists;
 }
 
 export async function signUp(credentials: Credentials) {

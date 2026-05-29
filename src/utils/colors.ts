@@ -12,6 +12,12 @@ interface ColorMap {
   success: string;
   error: string;
   neutral: string;
+  neutralBg: string;
+  neutralPrimaryText: string;
+  neutralSecondaryText: string;
+  neutralTertiaryText: string;
+  neutralBorder: string;
+  neutralAccent: string;
 }
 
 export const colorMap: ColorMap = {
@@ -26,4 +32,10 @@ export const colorMap: ColorMap = {
   success: "#22c55e",
   error: "#ef4444",
   neutral: "#d3d3d3",
+  neutralBg: "#070707",
+  neutralPrimaryText: "#e0e0e0",
+  neutralSecondaryText: "#b0b0b0",
+  neutralTertiaryText: "#707070",
+  neutralBorder: "#333333",
+  neutralAccent: "#888888",
 };

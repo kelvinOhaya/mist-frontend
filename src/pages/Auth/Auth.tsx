@@ -1,7 +1,8 @@
 import Login from "./Login";
-import SignUp from "./SignUp";
+import SignUp from "./SignUp.tsx";
 import "../../styles/global.css";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { slideTiming } from "@utils/animationTiming";
 import { TbArrowLeft } from "react-icons/tb";
 import { useEffect, useState } from "react";
 import useAuth from "../../contexts/auth/useAuth";
@@ -34,19 +35,39 @@ function Auth() {
         <TbArrowLeft /> Back to home
       </motion.button>
 
-      {mode === "login" ? (
-        <Login
-          setMode={setMode}
-          rememberMe={rememberMe}
-          setRememberMe={setRememberMe}
-        />
-      ) : (
-        <SignUp
-          setMode={setMode}
-          rememberMe={rememberMe}
-          setRememberMe={setRememberMe}
-        />
-      )}
+      <AnimatePresence mode="sync" initial={false}>
+        {mode === "login" ? (
+          <motion.div
+            key="login"
+            className="absolute inset-0 flex items-center justify-center"
+            initial={{ x: "-100vw" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100vw" }}
+            transition={{ duration: 0.3, ease: slideTiming as any }}
+          >
+            <Login
+              setMode={setMode}
+              rememberMe={rememberMe}
+              setRememberMe={setRememberMe}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="signup"
+            className="absolute inset-0 flex items-center justify-center"
+            initial={{ x: "100vw" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100vw" }}
+            transition={{ duration: 0.3, ease: slideTiming as any }}
+          >
+            <SignUp
+              setMode={setMode}
+              rememberMe={rememberMe}
+              setRememberMe={setRememberMe}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

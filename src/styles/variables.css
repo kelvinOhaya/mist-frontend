@@ -10,4 +10,10 @@
   --success: #22c55e;
   --error: #ef4444;
   --neutral: #d3d3d3;
+  --neutral-bg: #070707;
+  --neutral-primary-text: #e0e0e0;
+  --neutral-secondary-text: #b0b0b0;
+  --neutral-tertiary-text: #707070;
+  --neutral-border: #333333;
+  --neutral-accent: #888888;
 }

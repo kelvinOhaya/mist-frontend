@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useAuthLogic from "./useAuthLogic";
 import { checkIfUsernameExists } from "@api/authApi";
 import { useNavigate } from "react-router-dom";
+import { matchedPasswordValidator } from "@utils/validators";
 
 function useSignup() {
   const { signUp } = useAuthLogic();
@@ -10,34 +11,57 @@ function useSignup() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmedPassword, setConfirmedPassword] = useState<string>("");
+  const [usernameIsValid, setUsernameIsValid] = useState<boolean>(false);
+  const [passwordIsValid, setPasswordIsValid] = useState<boolean>(false);
+  const [confirmedPasswordIsValid, setConfirmedPasswordIsValid] =
+    useState<boolean>(false);
   const [generalError, setGeneralError] = useState<string>("");
+  const [loadingState, setLoadingState] = useState<
+    "loading" | "success" | "error" | null
+  >(null);
+
+  useEffect(() => {
+    setConfirmedPasswordIsValid(
+      matchedPasswordValidator(password, confirmedPassword),
+    );
+  }, [password, confirmedPassword]);
 
   const handleSignUp = async (
-    e: React.SubmitEvent<HTMLFormElement>,
+    e: React.FormEvent<HTMLFormElement>,
     rememberMe: boolean,
   ) => {
     e.preventDefault();
+    setLoadingState("loading");
+    setGeneralError("");
 
-    //verify inputs
     try {
       const usernameExists = await checkIfUsernameExists({
         username,
       });
       if (usernameExists) {
-        setGeneralError("Email already exists");
+        setGeneralError("username already exists");
+        setLoadingState("error");
+        return;
       }
     } catch {
-      //console.log("Error verifying signup form: ", error);
       setGeneralError("an error occured on our part");
+      setLoadingState("error");
+      return;
     }
 
     const signUpStatus = await signUp({ username, password }, rememberMe);
-    // console.log(`Status: ${signUpStatus}`);
     if (signUpStatus === 200) {
-      navigate("/chatroom");
-    } else {
-      setGeneralError("Issue signing in");
+      setLoadingState("success");
+      navigate("/dashboard");
+      return;
     }
+
+    if (signUpStatus == 401) {
+      setGeneralError("invalid username or password");
+    } else {
+      setGeneralError("an error occured on our part");
+    }
+    setLoadingState("error");
     return;
   };
 
@@ -49,6 +73,13 @@ function useSignup() {
     setPassword,
     confirmedPassword,
     setConfirmedPassword,
+    usernameIsValid,
+    setUsernameIsValid,
+    passwordIsValid,
+    setPasswordIsValid,
+    confirmedPasswordIsValid,
+    setConfirmedPasswordIsValid,
+    loadingState,
     generalError,
   };
 }

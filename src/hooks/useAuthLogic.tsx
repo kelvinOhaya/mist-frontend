@@ -8,7 +8,6 @@ import {
 } from "@api/authApi";
 import { registerAuthInterceptors } from "@api/api";
 import { Credentials, User } from "../types";
-import { useNavigate } from "react-router-dom";
 
 function useAuthLogic() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -27,7 +26,6 @@ function useAuthLogic() {
     setRefreshToken(newRefreshToken);
   };
 
-  const navigate = useNavigate();
   useEffect(() => {
     accessTokenRef.current = accessToken;
   }, [accessToken]);
@@ -85,7 +83,8 @@ function useAuthLogic() {
         ? localStorage.setItem("refreshToken", response.refreshToken)
         : sessionStorage.setItem("refreshToken", response.refreshToken);
 
-      await fetchUserRequest(response.accessToken);
+      const userData = await fetchUserRequest(response.accessToken);
+      setUser(userData);
       return 200;
     } catch (error: any) {
       //console.log("Error when trying to signup: ", error);
@@ -107,7 +106,8 @@ function useAuthLogic() {
         ? localStorage.setItem("refreshToken", response.refreshToken)
         : sessionStorage.setItem("refreshToken", response.refreshToken);
 
-      await fetchUserRequest(response.accessToken);
+      const userData = await fetchUserRequest(response.accessToken);
+      setUser(userData);
       return 200;
     } catch (error: any) {
       return error.response?.status;
@@ -120,15 +120,13 @@ function useAuthLogic() {
       setIsLoggingOut(true);
       await logoutRequest();
       localStorage.removeItem("refreshToken");
-      console.log(`LOCAL STORAGE: ${localStorage.getItem("refreshToken")}`);
       sessionStorage.removeItem("refreshToken");
-      console.log(`SESSION STORAGE: ${sessionStorage.getItem("refreshToken")}`);
       setUser(null);
       setTokens(null, null);
-      setIsLoggingOut(false);
-      navigate("/");
     } catch {
       //ignore error, continue with logout
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -139,8 +137,10 @@ function useAuthLogic() {
     try {
       const userData = await fetchUserRequest(token);
       setUser(userData);
+      return userData;
     } catch {
       setUser(null);
+      return null;
     }
   };
 

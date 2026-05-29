@@ -2,55 +2,61 @@ import { AnimatePresence, motion } from "framer-motion";
 import InputField from "@components/shared/InputField";
 import { Checkmark } from "react-checkmark";
 import { colorMap } from "@utils/colors";
-import useLogin from "@hooks/useLogin";
+import { matchedPasswordValidator, testPassword } from "@utils/validators";
 import Loader from "@components/shared/Loader";
+import useSignup from "@hooks/useSignup";
 
-interface LoginProps {
+interface SignUpProps {
   setMode: React.Dispatch<React.SetStateAction<string>>;
-  setRememberMe: React.Dispatch<React.SetStateAction<boolean>>;
   rememberMe: boolean;
+  setRememberMe: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function Login({ setMode }: LoginProps) {
-  //handles the state for logging in
+function SignUp({ setMode, rememberMe, setRememberMe }: SignUpProps) {
   const {
-    handleLogin,
+    handleSignUp,
     username,
     setUsername,
-    usernameIsValid,
-    setUsernameIsValid,
     password,
     setPassword,
+    confirmedPassword,
+    setConfirmedPassword,
+    usernameIsValid,
+    setUsernameIsValid,
     passwordIsValid,
     setPasswordIsValid,
-    error,
+    confirmedPasswordIsValid,
+    setConfirmedPasswordIsValid,
     loadingState,
-    rememberMe,
-    setRememberMe,
-  } = useLogin();
-  const inputsAreValid: boolean = usernameIsValid && passwordIsValid;
+    generalError,
+  } = useSignup();
+
+  const inputsAreValid: boolean =
+    usernameIsValid && passwordIsValid && confirmedPasswordIsValid;
 
   return (
     <div className="rounded-3xl absolute top-1/2 left-1/2 transform-[translate(-50%,-50%)] flex flex-col px-8 items-center bg-(--p100), border-radius-5 xs:w-[90vw] w-[320px] max-w-[320px] min-w-[320px]">
-      <h1 className="py-5 text-(--p100) text-3xl text-center">Welcome Back</h1>
+      <h1 className="py-5 text-(--p100) text-3xl text-center ">
+        It's good to have you
+      </h1>
       <form
-        className="flex flex-col "
-        onSubmit={(e) => handleLogin(e, rememberMe)}
+        className="flex flex-col"
+        onSubmit={(e) => handleSignUp(e, rememberMe)}
       >
         <InputField
-          id={"username"}
+          id="username"
           placeholder="username"
           type="text"
           value={username}
+          setValue={setUsername}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setUsername(e.target.value)
           }
-          setValue={setUsername}
           setEnableFlag={setUsernameIsValid}
-          neutralOnValid
         />
+
         <InputField
-          id={"password"}
+          id="password"
           placeholder="password"
           type="password"
           value={password}
@@ -58,34 +64,48 @@ function Login({ setMode }: LoginProps) {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setPassword(e.target.value)
           }
+          validator={testPassword}
           setEnableFlag={setPasswordIsValid}
-          neutralOnValid
+          errorMsg={[
+            "* at least 8 characters",
+            "* at least 1 uppercase letter",
+            "* at least 1 symbol",
+          ]}
         />
 
-        {error == "incorrect credentials" && (
-          <p className="text-(--error)">*Username Or Password Is Incorrect</p>
-        )}
-        {error == "server error" && (
-          <p className="text-(--error)">
-            *Sorry, an error on our part has occured
-          </p>
-        )}
+        <InputField
+          id="confirmedPassword"
+          placeholder="confirm password"
+          type="password"
+          value={confirmedPassword}
+          setValue={setConfirmedPassword}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setConfirmedPassword(e.target.value)
+          }
+          validator={(input: string) =>
+            matchedPasswordValidator(password, input)
+          }
+          setEnableFlag={setConfirmedPasswordIsValid}
+          errorMsg={["* passwords must match"]}
+        />
+
         <motion.button
           type="submit"
-          className="bg-(--p100) text-(--p600) rounded-xl py-2  my-3! hover:cursor-pointer"
+          className="bg-(--p100) text-(--p600) rounded-xl py-2 my-3! hover:cursor-pointer"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           animate={{ opacity: inputsAreValid ? 1 : 0.3 }}
           transition={{ duration: 0.3 }}
           disabled={!inputsAreValid}
         >
-          LOGIN
+          SIGN UP
         </motion.button>
+
         <span className="self-end flex gap-2">
           <motion.button
             type="button"
             className="text-(--p200) text-sm flex gap-2 items-center hover:cursor-pointer"
-            onClick={() => setRememberMe((prev: boolean) => !prev)}
+            onClick={() => setRememberMe((prev) => !prev)}
             animate={{
               color: rememberMe ? colorMap.success : colorMap.p100,
               transition: { duration: 0.2 },
@@ -95,15 +115,18 @@ function Login({ setMode }: LoginProps) {
             {rememberMe ? (
               <Checkmark size="1rem" color={colorMap.success} />
             ) : (
-              <span className="inline-block  w-4 h-4 rounded-sm border-2 border-(--p100)"></span>
+              <span className="inline-block w-4 h-4 rounded-sm border-2 border-(--p100)" />
             )}
           </motion.button>
         </span>
+
         <span className="self-end">
-          <span className="text-(--p200) text-sm">Not logged in?</span>{" "}
-          <button type="button" onClick={() => setMode("signup")}>
+          <span className="text-(--p200) text-sm">
+            Already have an account?
+          </span>{" "}
+          <button type="button" onClick={() => setMode("login")}>
             <span className="text-(--p100) hover:cursor-pointer text-sm">
-              Sign Up
+              Log in here
             </span>
           </button>
         </span>
@@ -121,8 +144,8 @@ function Login({ setMode }: LoginProps) {
                       : colorMap.neutral,
                 }}
               >
-                Authenticating
-              </motion.span>{" "}
+                Creating account
+              </motion.span>
               {loadingState === "loading" ? (
                 <Loader size={12} color={colorMap.p100} />
               ) : loadingState === "success" ? (
@@ -142,7 +165,7 @@ function Login({ setMode }: LoginProps) {
                 }}
                 className="flex gap-2 text-(--error)"
               >
-                <span>{error}</span>
+                <span>{generalError}</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -152,4 +175,4 @@ function Login({ setMode }: LoginProps) {
   );
 }
 
-export default Login;
+export default SignUp;

@@ -11,6 +11,17 @@ export interface User {
   updatedAt?: string;
 }
 
+export interface Message {
+  _id?: string;
+  sender: Pick<User, "username" | "profilePicture"> & {
+    _id?: string;
+  };
+  chatRoom?: string;
+  content: string;
+  createdAt?: string | number;
+  updatedAt?: string;
+}
+
 export interface Credentials {
   username: string;
   password: string;
