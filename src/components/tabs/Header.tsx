@@ -1,20 +1,30 @@
 import useChatRoom from "@contexts/chatRoom/useChatRoom";
 import { IoIosArrowBack } from "react-icons/io";
-import ProfilePicture from "@components/shared/ProfilePicture";
+import ProfilePicture from "@components/profile/ProfilePicture";
 import { useState } from "react";
 import { FaPencilAlt } from "react-icons/fa";
 import { MdPerson } from "react-icons/md";
 import Dropdown from "@components/shared/Dropdown";
 import LeaveGroupModal from "@components/shared/modals/LeaveGroupModal";
 import { AnimatePresence } from "framer-motion";
+import ProfileEditor from "@components/shared/ProfileEditor";
+import ChangeNameModal from "@components/shared/modals/ChangeNameModal";
+import { FaGear } from "react-icons/fa6";
+import GroupInfoModal from "@components/shared/modals/GroupInfoModal";
 
 interface HeaderProps {
   onBackToChats: () => void;
 }
 
-export type ActiveOptions = "changePfp" | "nameChange" | "leave" | "null";
+export type ActiveOptions =
+  | "changePfp"
+  | "nameChange"
+  | "leave"
+  | "groupSettings"
+  | "null";
 function Header({ onBackToChats }: HeaderProps) {
-  const { currentChat, currentChatId } = useChatRoom();
+  const { currentChat, currentChatId, changeName, updateGroupProfilePicture } =
+    useChatRoom();
 
   const [activeOption, setActiveOption] = useState<ActiveOptions>("null");
 
@@ -66,17 +76,22 @@ function Header({ onBackToChats }: HeaderProps) {
         title="Group Settings"
         options={[
           {
+            icon: <FaGear size={16} />,
+            text: "Group Info",
+            onClick: () => setActiveOption("groupSettings"),
+          },
+          {
             icon: <MdPerson size={16} />,
             text: "Change group profile picture",
-            onClick: () => console.log("Group pfp change btn clicked"),
+            onClick: () => setActiveOption("changePfp"),
           },
           {
             icon: <FaPencilAlt size={11} />,
             text: "Change Group Name",
-            onClick: () => console.log("Group name change btn clicked"),
+            onClick: () => setActiveOption("nameChange"),
           },
           {
-            bg: "(--error)",
+            bg: "(--p300)",
             text: "Leave group",
             onClick: () => setActiveOption("leave"),
           },
@@ -88,6 +103,23 @@ function Header({ onBackToChats }: HeaderProps) {
             key="leave-group-modal"
             trigger={() => setActiveOption("null")}
           />
+        )}
+        {activeOption === "changePfp" && (
+          <ProfileEditor
+            title={"Change group photo"}
+            trigger={() => setActiveOption("null")}
+            onUpload={async (file) => updateGroupProfilePicture(file)}
+          />
+        )}
+        {activeOption === "nameChange" && (
+          <ChangeNameModal
+            title="Change Group Name"
+            trigger={() => setActiveOption("null")}
+            onSubmit={async (newName) => changeName(newName)}
+          />
+        )}
+        {activeOption === "groupSettings" && (
+          <GroupInfoModal trigger={() => setActiveOption("null")} />
         )}
       </AnimatePresence>
     </div>

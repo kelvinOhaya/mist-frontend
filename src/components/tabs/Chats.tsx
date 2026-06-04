@@ -1,5 +1,10 @@
 import useChatRoom from "@contexts/chatRoom/useChatRoom";
-import ProfilePicture from "@components/shared/ProfilePicture";
+import ProfilePicture from "@components/profile/ProfilePicture";
+import { useState } from "react";
+import CreateGroupModal from "@components/shared/modals/CreateGroupModal";
+import { AnimatePresence } from "framer-motion";
+// import { useEffect } from "react";
+// import { ChatRoom } from "src/types";
 
 interface ChatsProps {
   onOpenChat: () => void;
@@ -8,9 +13,28 @@ interface ChatsProps {
 function Chats({ onOpenChat }: ChatsProps) {
   const { chatRooms, currentChatId, activateChat, messagesCache } =
     useChatRoom();
+  const [createGroupModalTrigger, setCreateGroupModalTrigger] =
+    useState<boolean>(false);
+
+  //debug log to see the current chatroom name
+  // useEffect(() => {
+  //   console.log(
+  //     chatRooms.filter((chat: ChatRoom) => chat._id === currentChatId)[0],
+  //   );
+  // }, [activateChat]);
+
   return (
     <div className="flex h-full flex-col overflow-y-auto p-4">
-      <span className=" pb-2 text-3xl">Chats</span>
+      <div className="flex w-full justify-start sm:justify-between sm:items-center pb-2">
+        <span className=" text-3xl">Chats</span>
+        {/* Create group chat button */}
+        <button
+          className="rounded-full absolute sm:relative max-sm:bottom-8 max-sm:right-8 bg-(--p300) w-8 h-8"
+          onClick={() => setCreateGroupModalTrigger(true)}
+        >
+          <span className="text-3xl">+</span>
+        </button>
+      </div>
       <div className="mr-auto flex w-full flex-col items-center gap-2.5 bg-transparent">
         {Array.isArray(chatRooms) ? (
           chatRooms
@@ -24,7 +48,7 @@ function Chats({ onOpenChat }: ChatsProps) {
                     chatRoom._id !== currentChatId &&
                       (await activateChat(chatRoom));
                     onOpenChat();
-                    console.log(JSON.stringify(messagesCache, null, 2));
+                    // console.log(JSON.stringify(messagesCache, null, 2));
                   }}
                 >
                   <ProfilePicture
@@ -48,6 +72,11 @@ function Chats({ onOpenChat }: ChatsProps) {
           <div className="text-[1.2rem] text-white">No Chats Yet</div>
         )}
       </div>
+      <AnimatePresence>
+        {createGroupModalTrigger && (
+          <CreateGroupModal trigger={() => setCreateGroupModalTrigger(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

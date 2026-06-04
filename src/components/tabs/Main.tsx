@@ -6,7 +6,8 @@ import { slideTiming } from "@utils/animationTiming";
 import { TabOptions } from "./Navbar";
 import useAuth from "@contexts/auth/useAuth";
 import useChatRoom from "@contexts/chatRoom/useChatRoom";
-import ProfilePicture from "@components/shared/ProfilePicture";
+import ProfilePicture from "@components/profile/ProfilePicture";
+import UserProfile from "@components/profile/UserProfile";
 
 interface MainProps {
   setActiveTab: React.Dispatch<React.SetStateAction<TabOptions>>;
@@ -22,15 +23,8 @@ function Main({ setActiveTab, activeTab, setIsInChatView }: MainProps) {
       className="order-last flex h-16 w-full bg-black shrink-0 flex-row   sm:order-first sm:h-full sm:max-w-fit sm:flex-col px-2"
     >
       <div className="flex w-full flex-1 items-center justify-between gap-1 px-2 sm:mt-2 sm:flex-col sm:justify-start sm:px-0">
-        <div className="hidden sm:mb-3 sm:block">
-          <ProfilePicture
-            src={user.profilePicture?.url}
-            alt={"your profile picture"}
-            size={34}
-          />
-        </div>
         <Option
-          icon={<MdPerson size={24} />}
+          icon={<UserProfile size={24} />}
           text={"Account"}
           active={activeTab === "account"}
           onClick={() => {

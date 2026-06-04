@@ -7,7 +7,10 @@ export async function uploadProfilePicture(formData: FormData) {
 }
 
 export async function uploadGroupProfilePicture(formData: FormData) {
-  const { data } = await api.post("/upload/group-profile-picture", formData);
+  const { data } = await api.post(
+    "/upload/group-profile-picture",
+    formData,
+  );
 
   return data.newProfilePicture;
 }

@@ -3,12 +3,13 @@ import { useState } from "react";
 import { slideTiming } from "@utils/animationTiming";
 import Main from "./Main";
 import ActivePane from "./ActivePane";
+import useChatRoom from "@contexts/chatRoom/useChatRoom";
 
 export type TabOptions = "chats" | "search" | "account";
 
 function ActiveTabs() {
   const [activeTab, setActiveTab] = useState<TabOptions>("chats");
-  const [isInChatView, setIsInChatView] = useState(false);
+  const { isInChatView, setIsInChatView } = useChatRoom();
 
   return (
     <motion.div

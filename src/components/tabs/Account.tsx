@@ -3,17 +3,22 @@
 //ChangeProfilePicture
 //changeUsername
 
-import ProfilePicture from "@components/shared/ProfilePicture";
+import ProfilePicture from "@components/profile/ProfilePicture";
 import useAuth from "@contexts/auth/useAuth";
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { FaCamera } from "react-icons/fa";
-import ChangeProfile from "./ChangeProfile";
-import { Modal } from "@components/shared/modals/modal";
+// ChangeProfile component unused here
 import LogoutModal from "@components/shared/modals/LogoutModal";
+import ProfileEditor from "@components/shared/ProfileEditor";
+import InfoTab from "@components/shared/InfoTab";
+import useChatRoom from "@contexts/chatRoom/useChatRoom";
+import UserProfile from "@components/profile/UserProfile";
 
 function Account() {
   const { user } = useAuth();
+  const { updateProfilePicture } = useChatRoom();
+  if (!user) return;
   const [showEditProfile, setShowEditProfile] = useState<boolean>(false);
   const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
 
@@ -33,10 +38,10 @@ function Account() {
         <InfoTab label={"username"} content={user.username} />
         <InfoTab label={"join code"} content={user.joinCode} />
       </div>
-      <div className="w-full mt-auto flex md:justify-end">
+      <div className="w-full mt-auto flex sm:justify-end">
         <button
           type="button"
-          className="bg-(--error) p-2 rounded-lg w-full md:w-auto hover:cursor-pointer"
+          className="bg-(--p300) p-2 rounded-lg w-full sm:w-fit hover:cursor-pointer"
           onClick={() => setShowLogoutModal(true)}
         >
           LOGOUT
@@ -44,7 +49,11 @@ function Account() {
       </div>
       <AnimatePresence>
         {showEditProfile && (
-          <ChangeProfile setShowEditProfile={setShowEditProfile} />
+          <ProfileEditor
+            title={"Upload a new photo"}
+            trigger={() => setShowEditProfile(false)}
+            onUpload={async (file) => updateProfilePicture(file)}
+          />
         )}
         {showLogoutModal && (
           <LogoutModal trigger={() => setShowLogoutModal(false)} />
@@ -61,6 +70,8 @@ function EditProfileBtn({
 }) {
   const { user } = useAuth();
 
+  if (!user) return null;
+
   return (
     <button
       type="button"
@@ -69,11 +80,7 @@ function EditProfileBtn({
     >
       <div className="flex rounded-full ">
         <span className="brightness-50">
-          <ProfilePicture
-            src={user.profilePicture?.url}
-            alt="Your profile picture"
-            size={108}
-          />
+          <UserProfile size={108} />
         </span>
         <FaCamera
           size={40}
@@ -81,22 +88,6 @@ function EditProfileBtn({
         />
       </div>
     </button>
-  );
-}
-
-interface LabelProps {
-  label: string;
-  content: string;
-}
-
-function InfoTab({ label, content }: LabelProps) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-(--neutral-secondary-text)">{label}</span>
-      <div className="px-2 py-2 border-3 border-(--neutral-accent) bg-[#070707] rounded-xl w-full">
-        <span className="text-md">{content}</span>
-      </div>
-    </div>
   );
 }
 

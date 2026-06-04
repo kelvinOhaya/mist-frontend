@@ -12,6 +12,7 @@ export interface User {
 }
 
 export interface Message {
+  type?: "message" | "notification";
   _id?: string;
   sender: Pick<User, "username" | "profilePicture"> & {
     _id?: string;
@@ -25,4 +26,39 @@ export interface Message {
 export interface Credentials {
   username: string;
   password: string;
+}
+
+export interface ChatRoom {
+  _id: string;
+  name: string;
+  otherUser?: OtherUser;
+  isDm: boolean;
+  creator: string;
+  members: Member[] | [];
+  joinCode: string;
+  exMembers: Member[] | [];
+  profilePicture: ProfilePicture;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  memberCount: number;
+}
+
+export interface OtherUser {
+  _id?: string;
+  username?: string;
+  joinCode?: string;
+  profilePicture?: string;
+}
+export interface Member {
+  _id: string;
+  username: string;
+  joinCode: string;
+  profilePicture: ProfilePicture;
+}
+
+export interface ProfilePicture {
+  url: string;
+  public_Id: string;
+  _id: string;
 }

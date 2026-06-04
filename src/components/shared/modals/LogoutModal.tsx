@@ -1,9 +1,13 @@
 import { Modal } from "./modal";
+import useAuth from "@contexts/auth/useAuth";
 
 interface LogoutModalProps {
   trigger: () => void;
 }
+
 function LogoutModal({ trigger }: LogoutModalProps) {
+  const { logout } = useAuth();
+
   return (
     <Modal
       title="Logout"
@@ -13,8 +17,9 @@ function LogoutModal({ trigger }: LogoutModalProps) {
         {
           text: "Yes",
           highlight: false,
-          onClick: () => {
-            console.log("Logged out");
+          onClick: async () => {
+            await logout();
+            trigger();
           },
         },
         {
@@ -27,4 +32,4 @@ function LogoutModal({ trigger }: LogoutModalProps) {
   );
 }
 
-export default LogoutModal
+export default LogoutModal;

@@ -1,10 +1,11 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import InputField from "@components/shared/InputField";
 import { Checkmark } from "react-checkmark";
 import { colorMap } from "@utils/colors";
 import { matchedPasswordValidator, testPassword } from "@utils/validators";
 import Loader from "@components/shared/Loader";
 import useSignup from "@hooks/useSignup";
+import ErrorShakeWrapper from "@components/shared/ErrorShakeWrapper";
 
 interface SignUpProps {
   setMode: React.Dispatch<React.SetStateAction<string>>;
@@ -154,21 +155,12 @@ function SignUp({ setMode, rememberMe, setRememberMe }: SignUpProps) {
             </div>
           )}
 
-          <AnimatePresence>
-            {loadingState === "error" && (
-              <motion.div
-                initial={{ x: -10 }}
-                animate={{ x: [0, -10, 10, -8, 8, -4, 4, 0] }}
-                transition={{
-                  duration: 0.45,
-                  ease: "easeInOut",
-                }}
-                className="flex gap-2 text-(--error)"
-              >
-                <span>{generalError}</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <ErrorShakeWrapper
+            show={loadingState === "error"}
+            className="flex gap-2 text-(--error)"
+          >
+            <span>{generalError}</span>
+          </ErrorShakeWrapper>
         </div>
       </div>
     </div>

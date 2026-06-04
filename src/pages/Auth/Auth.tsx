@@ -27,8 +27,9 @@ function Auth() {
         layout
         initial={{ opacity: 0.7, scale: 1, z: 0 }}
         whileHover={{ scale: 1.04, opacity: 1, z: 0 }}
-        className={`fixed top-8 left-8 text-(--p100) sm:text-xl text-xl flex gap-2 items-center`}
+        className={`fixed top-8 left-8 text-(--p100) sm:text-xl text-xl flex gap-2 items-center z-99`}
         onClick={() => {
+          console.log("clicked");
           navigate("/");
         }}
       >

@@ -10,15 +10,57 @@ import {
   updateCurrentRoom as updateCurrentRoomRequest,
   verifyJoinCode as verifyJoinCodeRequest,
 } from "@api/chatRoomApi";
-import { uploadProfilePicture } from "@api/uploadApi";
+import {
+  uploadProfilePicture,
+  uploadGroupProfilePicture,
+} from "@api/uploadApi";
 import useAuth from "@contexts/auth/useAuth";
 import useSocket from "@contexts/socket/useSocket";
+import { ChatRoom } from "src/types";
+
+const isSameId = (left: unknown, right: unknown) =>
+  String(left) === String(right);
+const appendUniqueRoom = (rooms: any[], nextRoom: any) =>
+  rooms.some((room) => isSameId(room._id, nextRoom?._id))
+    ? rooms
+    : [...rooms, nextRoom];
+
+const replaceRoomById = (
+  rooms: any[],
+  roomId: any,
+  updater: (room: any) => any,
+) => rooms.map((room) => (isSameId(room._id, roomId) ? updater(room) : room));
+
+const updateRoomMemberCount = (rooms: any[], roomId: any, delta: number) =>
+  replaceRoomById(rooms, roomId, (room) => ({
+    ...room,
+    memberCount: Math.max((room.memberCount ?? 0) + delta, 0),
+  }));
+
+const updateMessageSenderProfile = (
+  prevMessages: any,
+  userId: any,
+  newProfilePicture: any,
+) =>
+  Array.isArray(prevMessages)
+    ? prevMessages.map((message) =>
+        isSameId(message.sender?._id, userId)
+          ? {
+              ...message,
+              sender: {
+                ...message.sender,
+                profilePicture: newProfilePicture,
+              },
+            }
+          : message,
+      )
+    : prevMessages;
 
 function useChatRoomLogic() {
   const { user, setUser } = useAuth();
   const { socket } = useSocket();
   const [isCreator, setIsCreator] = useState<any>(null);
-  const [chatRooms, setChatRooms] = useState<any[]>([]);
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [currentChatId, setCurrentChatId] = useState<any>(null);
   const [messages, setMessages] = useState<any>(null);
   const [messagesCache, setMessagesCache] = useState<any>(null);
@@ -26,10 +68,16 @@ function useChatRoomLogic() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 798);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
+  const [isInChatView, setIsInChatView] = useState(false);
 
   const currentChat =
-    chatRooms?.find((room) => currentChatId === room._id) || null;
+    chatRooms.find((room) => isSameId(room._id, currentChatId)) || null;
   const prevRoomId = useRef<any>();
+  const currentChatIdRef = useRef<any>(null);
+
+  useEffect(() => {
+    currentChatIdRef.current = currentChatId;
+  }, [currentChatId]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -43,11 +91,6 @@ function useChatRoomLogic() {
     };
   }, []);
 
-  useEffect(
-    () => console.log(`Is it Tablet?: ${isTablet}\nIs it Mobile?: ${isMobile}`),
-    [isTablet, isMobile],
-  );
-
   const updateMessagesCache = (roomId: any, nextMessages: any) => {
     setMessagesCache((prev: any) => ({
       ...prev,
@@ -56,28 +99,26 @@ function useChatRoomLogic() {
   };
 
   const activateChat = async (element: any) => {
-    if (!user) return;
+    if (!user || !socket?.id || !element?._id) return;
     prevRoomId.current = currentChatId;
     setMessages(null);
     setCurrentChatId(element._id);
-    setIsCreator(user._id === element.creator);
+    setIsCreator(isSameId(user._id, element.creator));
     await updateCurrentRoomRequest(element._id, socket.id);
   };
 
   const loadChatRooms = useCallback(async () => {
     try {
       const data = await fetchChatRoomInfo();
-      setChatRooms(data.chatRooms);
-      setCurrentChatId(data.currentChat._id);
+      setChatRooms(data?.chatRooms ?? []);
+      setCurrentChatId(data?.currentChat?._id ?? null);
     } catch (_error: any) {
-      if (_error.response && _error.response.status == 401) {
-        // ignore unauthorized load errors here
-      }
+      if (_error?.response?.status === 401) return;
     }
   }, []);
 
   useEffect(() => {
-    if (!currentChat) return;
+    if (!socket || !currentChat) return;
     socket.emit("join-room", {
       prevRoom: prevRoomId.current,
       newRoom: currentChat._id,
@@ -96,47 +137,33 @@ function useChatRoomLogic() {
       setMessages((prev: any) => (prev ? [...prev, newMessage] : [newMessage]));
 
       setMessagesCache((prevCache: any) => {
-        if (!prevCache || !prevCache[currentChatId]) return prevCache;
+        const activeChatId = currentChatIdRef.current;
+        if (!prevCache || !activeChatId || !prevCache[activeChatId])
+          return prevCache;
 
         return {
           ...prevCache,
-          [currentChatId]: [...prevCache[currentChatId], newMessage],
+          [activeChatId]: [...prevCache[activeChatId], newMessage],
         };
       });
     };
 
     const handleUpdateRoomName = (data: any) => {
       const { roomId, newName } = data;
-      console.log(
-        `Data from the change name socket event: \n ${JSON.stringify(
-          data,
-          null,
-          2,
-        )}
-        )}`,
-      );
       setChatRooms((prev) =>
-        prev.map((room) =>
-          room._id === roomId
-            ? {
-                ...room,
-                name: newName,
-              }
-            : room,
-        ),
+        replaceRoomById(prev, roomId, (room) => ({
+          ...room,
+          name: newName,
+        })),
       );
     };
 
     const handleUpdateProfilePicture = async (data: any) => {
       const { foundUserId, newProfilePicture } = data;
 
-      console.log(
-        `Data from the update-profile-picture socket event\nFound user ID: ${foundUserId}\nNew Profile Picture Object: ${newProfilePicture}`,
-      );
-
-      setChatRooms((prev) =>
-        prev.map((room) =>
-          room.isDm && room.otherUser._id === foundUserId
+      setChatRooms((prev) => {
+        const result: ChatRoom[] = prev.map((room) =>
+          room.isDm && isSameId(room.otherUser?._id, foundUserId)
             ? {
                 ...room,
                 otherUser: {
@@ -145,43 +172,29 @@ function useChatRoomLogic() {
                 },
               }
             : room,
-        ),
-      );
+        );
+        return result;
+      });
 
-      if (user?._id === foundUserId) {
+      if (isSameId(user?._id, foundUserId)) {
         setUser((prev: any) =>
           prev ? { ...prev, profilePicture: newProfilePicture } : prev,
         );
       }
 
       setMessages((prev: any[]) =>
-        prev.map((message) =>
-          message.sender._id === foundUserId
-            ? {
-                ...message,
-                sender: {
-                  ...message.sender,
-                  profilePicture: newProfilePicture,
-                },
-              }
-            : message,
-        ),
+        updateMessageSenderProfile(prev, foundUserId, newProfilePicture),
       );
     };
 
     const updateGroupProfilePicture = async (data: any) => {
       const { roomId, newProfilePicture } = data;
-      console.log(
-        "Data for new profile picture: \n",
-        JSON.stringify(data, null, 2),
+      setChatRooms((prev) =>
+        replaceRoomById(prev, roomId, (room) => ({
+          ...room,
+          profilePicture: newProfilePicture,
+        })),
       );
-      setChatRooms((prev) => {
-        return prev.map((room) =>
-          room._id === roomId
-            ? { ...room, profilePicture: newProfilePicture }
-            : room,
-        );
-      });
       setCurrentChatId(roomId);
     };
 
@@ -191,28 +204,36 @@ function useChatRoomLogic() {
 
     const handleIncreaseMemberCount = (data: any) => {
       setChatRooms((prev) =>
-        prev.map((room) =>
-          room._id === data.updatedRoomId
-            ? { ...room, memberCount: room.memberCount + 1 }
-            : room,
-        ),
+        updateRoomMemberCount(prev, data.updatedRoomId, 1),
       );
     };
 
-    const handleDecreaseMemberCount = (data: any) => {
-      const { roomId } = data;
-      setChatRooms((prev) =>
-        prev.map((room) =>
-          room._id === roomId
-            ? { ...room, memberCount: room.memberCount - 1 }
-            : room,
-        ),
+    type DecreaseMemberCountType = {
+      roomId: string;
+      memberId: string;
+      msg: any;
+    };
+    const handleDecreaseMemberCount = (data: DecreaseMemberCountType) => {
+      const { roomId, memberId, msg } = data;
+      console.log(
+        `${data}\nPayload ID matches the current ID: ${isSameId(currentChatId, roomId)}`,
       );
+      setChatRooms((prev) =>
+        prev.map((room) => {
+          if (isSameId(roomId, room._id)) {
+            room.members.filter((member) => member._id === memberId);
+          }
+          return room;
+        }),
+      );
+      if (isSameId(roomId, currentChatId)) {
+        setMessages((prev: unknown[]) => [...prev, msg]);
+      }
     };
 
     const handleAddRoom = (data: any) => {
       const { updatedRoom } = data;
-      setChatRooms((prev) => [...prev, updatedRoom]);
+      setChatRooms((prev) => appendUniqueRoom(prev, updatedRoom));
     };
 
     socket.on("receive-message", handleReceiveMessage);
@@ -234,10 +255,10 @@ function useChatRoomLogic() {
       socket.off("increase-member-count", handleIncreaseMemberCount);
       socket.off("decrease-member-count", handleDecreaseMemberCount);
     };
-  }, [socket, user, chatRooms, messages, currentChatId]);
+  }, [socket, user, setUser]);
 
   useEffect(() => {
-    if (!currentChat) return;
+    if (!currentChatId || !currentChat) return;
 
     const getLoadedMessages = async () => {
       try {
@@ -254,7 +275,7 @@ function useChatRoomLogic() {
 
   useEffect(() => {
     if (!currentChat) return;
-    setIsCreator(user?._id === currentChat.creator);
+    setIsCreator(isSameId(user?._id, currentChat.creator));
   }, [currentChat, user]);
 
   const verifyJoinCode = async (joinCode: any) => {
@@ -266,21 +287,19 @@ function useChatRoomLogic() {
   };
 
   const checkIfRoomExists = (joinCode: any) => {
-    const roomExists = chatRooms.find((room) => room.joinCode === joinCode);
-    return roomExists ? true : false;
+    return chatRooms.some((room) => room.joinCode === joinCode);
   };
 
   const checkIfDmExists = (joinCode: any) => {
-    const dmExists = chatRooms.find(
+    return chatRooms.some(
       (room) => room.otherUser?.joinCode === joinCode && room.isDm === true,
     );
-    return dmExists ? true : false;
   };
 
   const joinRoom = async (joinCode: any) => {
     try {
       const newRoom = await joinRoomRequest(joinCode);
-      setChatRooms((prev) => (prev ? [...prev, newRoom] : [newRoom]));
+      setChatRooms((prev) => appendUniqueRoom(prev, newRoom));
     } catch {
       // ignore join errors
     }
@@ -288,30 +307,33 @@ function useChatRoomLogic() {
 
   const createGroup = async (groupName: any) => {
     if (!user) return;
-    const newRoom = await createGroupRequest(user._id, groupName);
-    if (chatRooms != null) {
-      setChatRooms([...chatRooms, newRoom]);
-    } else {
-      setChatRooms([newRoom]);
+    try {
+      const newRoom = await createGroupRequest(user._id, groupName);
+      setChatRooms((prev) => appendUniqueRoom(prev, newRoom));
+      setCurrentChatId(newRoom._id);
+      setIsCreator(true);
+    } catch {
+      // ignore create errors
     }
-    setCurrentChatId(newRoom._id);
   };
 
   const leaveChatRoom = async () => {
     if (!currentChatId) return;
     try {
       await leaveRoomRequest(currentChatId);
-      socket.emit("leave-room", { currentRoomId: currentChatId });
-      setChatRooms((prev) => prev.filter((room) => room._id != currentChatId));
+      setChatRooms((prev) =>
+        prev.filter((room) => !isSameId(room._id, currentChatId)),
+      );
       setCurrentChatId(null);
       setMessages(null);
+      setIsCreator(null);
     } catch {
       // ignore leave errors
     }
   };
 
   const sendMessage = (chatRoomId: any, content: any) => {
-    socket.emit("send-message", {
+    socket?.emit("send-message", {
       chatRoomId,
       content,
       sender: user,
@@ -319,20 +341,54 @@ function useChatRoomLogic() {
   };
 
   const changeName = async (newName: any) => {
+    if (!currentChat?._id) return;
     try {
       const foundChatRoom = await changeRoomNameRequest(
         newName,
         currentChat._id,
       );
-      socket.emit("change-room-name", foundChatRoom);
+      socket?.emit("change-room-name", foundChatRoom);
     } catch {
       // ignore change name errors
     }
   };
 
+  const updateGroupProfilePicture = async (file: File) => {
+    if (!currentChat?._id) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("roomId", String(currentChat._id));
+
+    try {
+      const newProfilePicture = await uploadGroupProfilePicture(formData);
+
+      setChatRooms((prev) =>
+        replaceRoomById(prev, currentChat._id, (room) => ({
+          ...room,
+          profilePicture: newProfilePicture,
+        })),
+      );
+
+      setCurrentChatId(currentChat._id);
+      socket?.emit("receive-group-photo-update", {
+        roomId: currentChat._id,
+        newProfilePicture,
+      });
+    } catch (err) {
+      // ignore errors
+    }
+  };
+
   const findUser = async (joinCode: any) => {
-    const newRoom = await findUserRequest(joinCode, socket.id);
-    setChatRooms((prev) => [...prev, newRoom]);
+    if (!socket?.id) return;
+
+    try {
+      const newRoom = await findUserRequest(joinCode, socket.id);
+      setChatRooms((prev) => appendUniqueRoom(prev, newRoom));
+    } catch {
+      // ignore find-user errors
+    }
   };
 
   const updateProfilePicture = async (file: File) => {
@@ -349,7 +405,7 @@ function useChatRoomLogic() {
 
     setChatRooms((prev) =>
       prev.map((room) =>
-        room.isDm && room.otherUser?._id === user._id
+        room.isDm && isSameId(room.otherUser?._id, user._id)
           ? {
               ...room,
               otherUser: {
@@ -377,7 +433,7 @@ function useChatRoomLogic() {
         : prev,
     );
 
-    socket.emit("update-profile-picture", {
+    socket?.emit("update-profile-picture", {
       foundUserId: user._id,
       newProfilePicture,
     });
@@ -415,8 +471,11 @@ function useChatRoomLogic() {
     loadChatRooms,
     sendMessage,
     changeName,
+    updateGroupProfilePicture,
     sidebarIsOpen,
     setSidebarIsOpen,
+    isInChatView,
+    setIsInChatView,
   };
 }
 

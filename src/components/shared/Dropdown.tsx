@@ -52,7 +52,7 @@ function Dropdown({ options, title }: DropdownProps) {
               initial={{ opacity: 0, z: 0 }}
               animate={{ opacity: [0, 0, 0, 1], z: 0 }}
               exit={{ opacity: [1, 0, 0, 0], z: 0 }}
-              className="flex flex-col items-start gap-2"
+              className="flex flex-col items-start gap-1"
             >
               <span className="self-center my-1 mb-2 text-xl">{title}</span>
 
@@ -92,7 +92,7 @@ function OptionComponent({
   return (
     <button
       type="button"
-      className={`flex items-start gap-2 w-full text-baseline hover:bg-(--neutral-border) hover:cursor-pointer transition-colors duration-300 p-2 rounded-3xl bg-${bg} ${!icon && "justify-between"} whitespace-nowrap`}
+      className={`flex items-start gap-2 w-full text-baseline hover:bg-(--neutral-border) hover:cursor-pointer transition-colors duration-300 px-2 py-1 rounded-3xl bg-${bg} ${!icon && "justify-between"} whitespace-nowrap`}
       onClick={() => {
         onClick();
       }}
