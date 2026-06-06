@@ -22,7 +22,7 @@ function Auth() {
   }, [refreshToken, user]);
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full flex flex-col bg-linear-to-b from-(--p600) to-(--p300)">
+    <div className="fixed top-0 left-0 w-full h-full flex flex-col bg-(--neutral-bg)">
       <motion.button
         layout
         initial={{ opacity: 0.7, scale: 1, z: 0 }}
