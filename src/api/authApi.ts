@@ -1,4 +1,4 @@
-import type { Credentials, User } from "../src/types";
+import type { Credentials, User } from "../types";
 import { api } from "./api";
 
 export interface AuthTokens {

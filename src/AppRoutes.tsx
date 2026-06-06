@@ -1,6 +1,6 @@
 import Home from "./pages/Home/Home";
 import Auth from "./pages/Auth/Auth";
-import ChatRoom from "./pages/ChatRoom/ChatRoom";
+import ChatRoom from "./pages/Dashboard/ChatRoom";
 import ProtectedRoute from "@routes/ProtectedRoute";
 import ChatRoomProvider from "@contexts/chatRoom/ChatRoomProvider";
 import SocketProvider from "@contexts/socket/SocketProvider";
@@ -72,7 +72,10 @@ function AppRoutes() {
               </motion.div>
             }
           />
-          <Route path="/chatroom" element={<Navigate to="/dashboard" replace />} />
+          <Route
+            path="/chatroom"
+            element={<Navigate to="/dashboard" replace />}
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>

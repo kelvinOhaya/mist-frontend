@@ -96,7 +96,7 @@ function ProfileEditor({
           >
             {loadingState === "pending" ? (
               <>
-                changing profile <LoadingDots />
+                Changing <LoadingDots />
               </>
             ) : (
               "CONFIRM"

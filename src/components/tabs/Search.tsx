@@ -53,7 +53,7 @@ function Search({ onSearch }: SearchProps) {
             className="bg-neutral-800 rounded-lg w-full px-2 flex justify-between"
             onClick={() => setDropdownIsOpen((prev) => !prev)}
           >
-            <span> {searchMode}</span>
+            <span className="mr-2 min-w-25 max-w-25">{searchMode}</span>
             <motion.span
               className="inline-block rotate-90"
               animate={{ rotate: dropdownIsOpen ? 180 : 0 }}

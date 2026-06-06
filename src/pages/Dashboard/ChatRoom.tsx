@@ -3,7 +3,8 @@ import "../../styles/global.css";
 import useChatRoom from "@contexts/chatRoom/useChatRoom";
 import useSocket from "../../contexts/socket/useSocket";
 import useAuth from "../../contexts/auth/useAuth";
-import ActiveTabs from "../../components/chat-room/chats-tab/Navbar";
+import ActiveTabs from "@components/tabs/Navbar";
+
 function ChatRoom() {
   const { loadChatRooms } = useChatRoom();
   const { isLoading, user, accessToken } = useAuth();

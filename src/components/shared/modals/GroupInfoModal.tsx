@@ -21,7 +21,7 @@ function GroupInfoModal({ trigger }: GroupInfoModalProps) {
         <span>Join Code</span>
         <div
           className="
-         bg-(--neutral-accent) rounded-lg flex items-center justify-center w-full"
+         border-2 border-(--neutral-accent) rounded-lg flex items-center justify-center w-full"
         >
           <span>{currentChat.joinCode}</span>
         </div>

@@ -3,8 +3,8 @@
     "baseUrl": ".",
     "ignoreDeprecations": "6.0",
     "paths": {
-      "@api": ["./api"],
-      "@api/*": ["./api/*"],
+      "@api": ["src/api"],
+      "@api/*": ["src/api/*"],
       "@clouds": ["./src/assets/clouds/index.ts"],
       "@clouds/*": ["./src/assets/clouds/*"],
       "@assets": ["./src/assets"],
@@ -45,5 +45,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src", "src/api"]
 }

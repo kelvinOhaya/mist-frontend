@@ -12,7 +12,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), svgr()],
   resolve: {
     alias: {
-      "@api": path.resolve(__dirname, "./api"),
+      "@api": path.resolve(__dirname, "./src/api"),
       "@assets": path.resolve(__dirname, "./src/assets"),
       "@clouds": path.resolve(__dirname, "./src/assets/clouds"),
       "@components": path.resolve(__dirname, "./src/components"),

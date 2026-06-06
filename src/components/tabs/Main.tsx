@@ -1,12 +1,9 @@
 import { motion } from "framer-motion";
-import { MdPerson } from "react-icons/md";
 import { TbMessage, TbSearch } from "react-icons/tb";
 import { ReactNode } from "react";
 import { slideTiming } from "@utils/animationTiming";
 import { TabOptions } from "./Navbar";
-import useAuth from "@contexts/auth/useAuth";
 import useChatRoom from "@contexts/chatRoom/useChatRoom";
-import ProfilePicture from "@components/profile/ProfilePicture";
 import UserProfile from "@components/profile/UserProfile";
 
 interface MainProps {
@@ -15,7 +12,6 @@ interface MainProps {
   setIsInChatView: React.Dispatch<React.SetStateAction<boolean>>;
 }
 function Main({ setActiveTab, activeTab, setIsInChatView }: MainProps) {
-  const { user } = useAuth();
   const { currentChatId } = useChatRoom();
   return (
     <motion.aside
