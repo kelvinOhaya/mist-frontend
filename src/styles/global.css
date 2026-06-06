@@ -6,20 +6,20 @@
   box-sizing: border-box;
 }
 
-/* 1. Tell the ultimate background of the phone screen to be your gray */
+/* 1. Force the absolute bottom-layer system shell to be flat dark gray */
 html {
   background-color: #070707 !important;
 }
 
-/* 2. CRITICAL: Allow the body to span the full hardware screen size */
 html,
 body {
   min-height: 100%;
   margin: 0;
   padding: 0;
+  background-color: #070707 !important; /* Overrides any bleeding gradient utilities */
 }
 
-/* 3. Paint over the Top Notch Area */
+/* 2. Block the top notch safe area with solid gray */
 body::before {
   content: "";
   position: fixed;
@@ -28,14 +28,14 @@ body::before {
   right: 0;
   height: env(
     safe-area-inset-top,
-    20px
-  ); /* Fallback to 20px forces it if Safari is bugged */
-  background-color: #070707;
+    44px
+  ); /* Defaults to notch height if Safari yields 0 */
+  background-color: #070707 !important;
   z-index: 999999;
   pointer-events: none;
 }
 
-/* 4. Paint over the Bottom Indicator Area */
+/* 3. Block the bottom system bar with solid gray */
 body::after {
   content: "";
   position: fixed;
@@ -44,24 +44,32 @@ body::after {
   right: 0;
   height: env(
     safe-area-inset-bottom,
-    20px
-  ); /* Fallback to 20px forces it if Safari is bugged */
-  background-color: #070707;
+    34px
+  ); /* Defaults to home indicator height if Safari yields 0 */
+  background-color: #070707 !important;
   z-index: 999999;
   pointer-events: none;
 }
 
-/* 5. Keep your app layout contained and scrolling cleanly inside React */
+/* 4. Lock your linear gradient strictly INSIDE the safe zone boundaries */
 #root {
   position: fixed;
-  top: 0;
+  /* Push content inside safe borders so the gradient can never spill into them */
+  top: env(safe-area-inset-top, 44px);
+  bottom: env(safe-area-inset-bottom, 34px);
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 100dvh;
+
+  /* Calculate exact inner screen height to prevent layout overflow */
+  height: calc(
+    100dvh - env(safe-area-inset-top, 44px) - env(safe-area-inset-bottom, 34px)
+  );
+
   overflow: hidden;
   overscroll-behavior: none;
-  background: #070707;
+
+  /* Move your p300-p600 gradient definition right here if applied via CSS variables */
+  background: linear-gradient(to bottom, var(--p300), var(--p600));
 }
 
 .inputField:-webkit-autofill,
