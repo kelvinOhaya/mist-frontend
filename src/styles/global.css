@@ -6,61 +6,62 @@
   box-sizing: border-box;
 }
 
-/* 1. Force the root background to default to dark gray */
-html {
-  background-color: #070707 !important;
+/* Force Tailwind v4 to ingest these overrides right into the base theme layer */
+@layer base {
+  /* 1. Target the ultimate window shell */
+  html {
+    background-color: #070707 !important;
+  }
+
+  html,
+  body {
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    background-color: #070707 !important;
+  }
+
+  /* 2. Paint over the Top Notch Area */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 44px);
+    background-color: #070707 !important;
+    z-index: 999999 !important;
+    pointer-events: none;
+  }
+
+  /* 3. Paint over the Bottom Home Indicator Pad */
+  body::after {
+    content: "";
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-bottom, 34px);
+    background-color: #070707 !important;
+    z-index: 999999 !important;
+    pointer-events: none;
+  }
+
+  /* 4. Ensure the React root layer drops low enough to let pseudo-bars cover it */
+  #root {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+    z-index: 1 !important;
+  }
 }
 
-html,
-body {
-  min-height: 100dvh;
-  margin: 0;
-  padding: 0;
-  background-color: #070707 !important;
-}
-
-/* 2. Lock your app shell back to full viewport size */
-#root {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 100dvh;
-  overflow: hidden;
-  overscroll-behavior: none;
-  /* Crucial: Lower root stacking context so pseudo elements sit on top */
-  z-index: 1;
-}
-
-/* 3. Paint over the Top Notch Area (Forces it above the gradient) */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: env(safe-area-inset-top, 44px);
-  background-color: #070707 !important;
-  /* Crucial: Set explicit z-index higher than #root to block the gradient */
-  z-index: 999999 !important;
-  pointer-events: none;
-}
-
-/* 4. Paint over the Bottom Indicator Area (Forces it above the gradient) */
-body::after {
-  content: "";
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: env(safe-area-inset-bottom, 34px);
-  background-color: #070707 !important;
-  /* Crucial: Set explicit z-index higher than #root to block the gradient */
-  z-index: 999999 !important;
-  pointer-events: none;
-}
-
+/* Rest of your custom classes remain unchanged outside base layers */
 .inputField:-webkit-autofill,
 .inputField:-webkit-autofill:hover,
 .inputField:-webkit-autofill:focus {
