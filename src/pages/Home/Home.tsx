@@ -14,7 +14,7 @@ function Home({ animationsPlayed, setAnimationsPlayed }: HomeProps) {
 
   return (
     <div
-      className="fixed flex felx-col top-0 left-0 w-full h-full z-99 overflow-hidden items-center
+      className="fixed flex flex-col top-0 left-0 w-full h-full z-99 overflow-hidden items-center
     justify-center bg-linear-to-b from-(--p600) to-(--p300)"
     >
       {/* Contains all texts and icons */}

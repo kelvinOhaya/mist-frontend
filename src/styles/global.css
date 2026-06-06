@@ -21,6 +21,15 @@ body {
   overflow: hidden;
   overscroll-behavior: none;
   background: linear-gradient(to bottom, var(--p600), var(--p300));
+  --safe-area-inset-top: 48px;
+  --safe-area-inset-bottom: 34px;
+}
+
+/* Fallback for browsers/emulators that return 0px for env() */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-padding-top {
+    padding-top: max(var(--safe-area-inset-top), env(safe-area-inset-top));
+  }
 }
 
 .inputField:-webkit-autofill,

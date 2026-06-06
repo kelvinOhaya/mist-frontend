@@ -29,22 +29,24 @@ function useLogin() {
     submittingRef.current = true;
 
     try {
-      const loginStatus = await login({ username, password }, rememberMe);
+      const loginResult = await login({ username, password }, rememberMe);
 
-      if (loginStatus === 200) {
+      if (loginResult.status === 200) {
         setLoadingState("success");
         navigate("/dashboard");
         return;
       }
 
-      if (loginStatus == 401) {
+      if (loginResult.status == 401) {
         setError("invalid username or password");
         setLoadingState("error");
       } else {
+        console.log(loginResult);
         setError("an error occured on our part");
         setLoadingState("error");
       }
     } catch (error) {
+      console.log(error);
       setError("an error occured on our part");
       setLoadingState("error");
     } finally {

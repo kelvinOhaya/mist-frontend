@@ -98,7 +98,8 @@ function useAuthLogic() {
     rememberMe: boolean,
   ) => {
     try {
-      const response = await loginRequest(credentials);
+      const response: any = await loginRequest(credentials);
+      console.log("Response: " + response);
       setTokens(response.accessToken, response.refreshToken);
 
       // Store refresh token in sessionStorage, or local storage if the user wants to be remembered
@@ -108,9 +109,9 @@ function useAuthLogic() {
 
       const userData = await fetchUserRequest(response.accessToken);
       setUser(userData);
-      return 200;
+      return { status: 200, message: "Success" };
     } catch (error: any) {
-      return error.response?.status;
+      return error.response;
     }
   };
 
