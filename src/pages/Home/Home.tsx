@@ -17,7 +17,6 @@ function Home({ animationsPlayed, setAnimationsPlayed }: HomeProps) {
       className="fixed flex felx-col top-0 left-0 w-full h-full z-99 overflow-hidden items-center
     justify-center bg-linear-to-b from-(--p600) to-(--p300)"
     >
-      <Background />
       {/* Contains all texts and icons */}
       <main className=" flex flex-col text-center items-center justify-center">
         {/* Title and description */}
