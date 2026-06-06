@@ -6,49 +6,58 @@
   box-sizing: border-box;
 }
 
-/* FIX: Cleaned up the root shell and removed invalid nested code blocks */
+/* 1. Tell the ultimate background of the phone screen to be your gray */
 html {
   background-color: #070707 !important;
 }
 
+/* 2. CRITICAL: Allow the body to span the full hardware screen size */
 html,
 body {
-  height: 100dvh;
+  min-height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
-  overscroll-behavior: none;
-  background: #070707;
 }
 
-/* FIX: Moved outside the parent block so Safari executes them correctly */
-/* 2. Paint over the Top Notch / Status Bar Safe Area */
+/* 3. Paint over the Top Notch Area */
 body::before {
   content: "";
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: env(safe-area-inset-top, 0px);
+  height: env(
+    safe-area-inset-top,
+    20px
+  ); /* Fallback to 20px forces it if Safari is bugged */
   background-color: #070707;
   z-index: 999999;
   pointer-events: none;
 }
 
-/* 3. Paint over the Bottom Home Indicator Pad */
+/* 4. Paint over the Bottom Indicator Area */
 body::after {
   content: "";
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: env(safe-area-inset-bottom, 0px);
+  height: env(
+    safe-area-inset-bottom,
+    20px
+  ); /* Fallback to 20px forces it if Safari is bugged */
   background-color: #070707;
   z-index: 999999;
   pointer-events: none;
 }
 
+/* 5. Keep your app layout contained and scrolling cleanly inside React */
 #root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   height: 100dvh;
   overflow: hidden;
   overscroll-behavior: none;
