@@ -28,6 +28,7 @@ function useSocketLogic() {
       auth: { userId },
       transports: ["websocket", "polling"],
       withCredentials: true,
+      upgrade: false,
     });
 
     socketRef.current = nextSocket;
