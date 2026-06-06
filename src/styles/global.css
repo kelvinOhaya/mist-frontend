@@ -8,28 +8,19 @@
 
 html,
 body {
-  height: 100%;
+  height: 100dvh;
   margin: 0;
   padding: 0;
   overflow: hidden;
   overscroll-behavior: none;
-  background: linear-gradient(to bottom, var(--p600), var(--p300));
+  background: #070707;
 }
 
 #root {
-  height: 100%;
+  height: 100dvh;
   overflow: hidden;
   overscroll-behavior: none;
-  background: linear-gradient(to bottom, var(--p600), var(--p300));
-  --safe-area-inset-top: 48px;
-  --safe-area-inset-bottom: 34px;
-}
-
-/* Fallback for browsers/emulators that return 0px for env() */
-@supports (padding-top: env(safe-area-inset-top)) {
-  .safe-padding-top {
-    padding-top: max(var(--safe-area-inset-top), env(safe-area-inset-top));
-  }
+  background: #070707;
 }
 
 .inputField:-webkit-autofill,
