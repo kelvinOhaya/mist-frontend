@@ -4,11 +4,7 @@ import useChatRoom from "@contexts/chatRoom/useChatRoom";
 import { AnimatePresence, motion } from "framer-motion";
 import { MdArrowBackIosNew } from "react-icons/md";
 
-interface SearchProps {
-  onSearch: () => Promise<void>;
-}
-
-function Search({ onSearch }: SearchProps) {
+function Search() {
   const [searchInput, setSearchInput] = useState<string>("");
   const [loadingState, setLoadingState] = useState<
     "pending" | "success" | "error" | null

@@ -24,7 +24,7 @@ function ActivePane({
   isInChatView,
   setIsInChatView,
 }: ActivePaneProps) {
-  const { currentChatId, messages } = useChatRoom();
+  const { currentChatId, messages, currentChat } = useChatRoom();
   const { user } = useAuth();
 
   const panes = useMemo(
@@ -88,7 +88,9 @@ function ActivePane({
               <div className="flex-1 overflow-y-auto px-2.5 pt-5 pb-24 scrollbar-none">
                 {messages?.map(showMessages)}
               </div>
-              {currentChatId && <TextBar />}
+              {currentChatId &&
+                currentChat.joinCode !== "Hiubuw" &&
+                currentChatId.name !== "Welcome Page" && <TextBar />}
             </div>
           ) : (
             panes[activeTab]
