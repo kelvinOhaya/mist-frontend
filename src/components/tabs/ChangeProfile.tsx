@@ -18,7 +18,7 @@ function ChangeProfile({ setShowEditProfile }: ChangeProfileProps) {
   >(null);
 
   const [preview, setPreview] = useState<string>(
-    user.profilePicture?.url || defaultProfile,
+    user?.profilePicture?.url || defaultProfile,
   );
   const [file, setFile] = useState<File | null>(null);
 

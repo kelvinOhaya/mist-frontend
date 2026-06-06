@@ -64,7 +64,7 @@ function ActivePane({
             : null}
         </span>
         <ChatMessage
-          isSender={user.username === message.sender.username}
+          isSender={user?.username === message.sender.username}
           message={message}
         />
       </div>

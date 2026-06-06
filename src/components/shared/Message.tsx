@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import type { Message as MessageType } from "../types";
+import type { Message as MessageType } from "../../types";
 import ProfilePicture from "../profile/ProfilePicture";
 
 export interface MessageProps {
