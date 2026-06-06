@@ -43,11 +43,11 @@ function CreateGroupModal({ trigger }: ModalWithInputProps) {
       )}
       {loadingState === "pending" && (
         <span className="text-(--neutral-primary-text)">
-          Changing name <LoadingDots />
+          Creating group <LoadingDots />
         </span>
       )}
       {loadingState === "success" && (
-        <span className="text-(--success)">Name successfully Changed!</span>
+        <span className="text-(--success)">Sucessfully created!</span>
       )}
       <div className="flex gap-2 w-full">
         <ModalButton highlight={false} onClick={() => handleSubmit()}>

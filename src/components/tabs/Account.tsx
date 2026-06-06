@@ -3,7 +3,6 @@
 //ChangeProfilePicture
 //changeUsername
 
-import ProfilePicture from "@components/profile/ProfilePicture";
 import useAuth from "@contexts/auth/useAuth";
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
@@ -14,7 +13,7 @@ import ProfileEditor from "@components/shared/ProfileEditor";
 import InfoTab from "@components/shared/InfoTab";
 import useChatRoom from "@contexts/chatRoom/useChatRoom";
 import UserProfile from "@components/profile/UserProfile";
-
+import defaultProfile from "@assets/defaultProfile.jpg";
 function Account() {
   const { user } = useAuth();
   const { updateProfilePicture } = useChatRoom();
@@ -50,6 +49,7 @@ function Account() {
       <AnimatePresence>
         {showEditProfile && (
           <ProfileEditor
+            initialUrl={user.profilePicture?.url || undefined}
             title={"Upload a new photo"}
             trigger={() => setShowEditProfile(false)}
             onUpload={async (file) => updateProfilePicture(file)}

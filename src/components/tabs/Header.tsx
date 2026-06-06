@@ -100,12 +100,14 @@ function Header({ onBackToChats }: HeaderProps) {
       <AnimatePresence>
         {activeOption === "leave" && (
           <LeaveGroupModal
+            isDm={currentChat.isDm}
             key="leave-group-modal"
             trigger={() => setActiveOption("null")}
           />
         )}
         {activeOption === "changePfp" && (
           <ProfileEditor
+            initialUrl={currentChat.profilePicture?.url}
             title={"Change group photo"}
             trigger={() => setActiveOption("null")}
             onUpload={async (file) => updateGroupProfilePicture(file)}

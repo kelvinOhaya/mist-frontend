@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { loadingOptions, useLoadingState } from "@hooks/useLoadingState";
+import defaultProfile from "@assets/defaultProfile.jpg";
 
 type UploadFn = (file: File, signal?: AbortSignal) => Promise<string>;
 
@@ -25,7 +26,7 @@ export default function useProfileEditor(
   uploadFn?: UploadFn,
 ): UseProfileEditorReturn {
   const { loadingState, setLoadingState } = useLoadingState();
-  const [preview, setPreview] = useState<string>(initialUrl || "");
+  const [preview, setPreview] = useState<string>(initialUrl || defaultProfile);
   const [file, setFile] = useState<File | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -83,18 +84,21 @@ export default function useProfileEditor(
 
   const isDirty = Boolean(file);
 
-  const clear = useCallback((resetToInitial = true) => {
-    if (createdObjectUrlRef.current) {
-      try {
-        URL.revokeObjectURL(createdObjectUrlRef.current);
-      } catch {}
-      createdObjectUrlRef.current = null;
-    }
-    setFile(null);
-    setPreview(resetToInitial ? (initialUrl || "") : "");
-    setErrorMsg(null);
-    setLoadingState("idle");
-  }, [initialUrl, setLoadingState]);
+  const clear = useCallback(
+    (resetToInitial = true) => {
+      if (createdObjectUrlRef.current) {
+        try {
+          URL.revokeObjectURL(createdObjectUrlRef.current);
+        } catch {}
+        createdObjectUrlRef.current = null;
+      }
+      setFile(null);
+      setPreview(resetToInitial ? initialUrl || "" : "");
+      setErrorMsg(null);
+      setLoadingState("idle");
+    },
+    [initialUrl, setLoadingState],
+  );
 
   const handleSubmit = useCallback(async () => {
     if (!file) return;

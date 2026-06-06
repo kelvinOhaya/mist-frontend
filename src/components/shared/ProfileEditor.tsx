@@ -10,11 +10,15 @@ interface ProfileEditorProps {
   trigger: () => void;
   onUpload: (file: File) => Promise<any>;
   title: string;
+  initialUrl?: string;
 }
 
-function ProfileEditor({ trigger, onUpload, title }: ProfileEditorProps) {
-  const { user } = useAuth();
-
+function ProfileEditor({
+  trigger,
+  onUpload,
+  title,
+  initialUrl = defaultProfile,
+}: ProfileEditorProps) {
   const {
     preview,
     file,
@@ -25,7 +29,7 @@ function ProfileEditor({ trigger, onUpload, title }: ProfileEditorProps) {
     clear,
     errorMsg,
     setErrorMsg,
-  } = useProfileEditor(user?.profilePicture?.url || defaultProfile);
+  } = useProfileEditor(initialUrl);
 
   const onConfirm = useCallback(async () => {
     if (!file) {
