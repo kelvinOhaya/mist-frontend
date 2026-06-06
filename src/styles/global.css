@@ -14,6 +14,37 @@ body {
   overflow: hidden;
   overscroll-behavior: none;
   background: #070707;
+
+  /* 1. Force the root HTML shell to the exact gray background */
+  html {
+    background-color: #070707 !important;
+  }
+
+  /* 2. Paint over the Top Notch / Status Bar Safe Area */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 0px);
+    background-color: #070707;
+    z-index: 999999;
+    pointer-events: none;
+  }
+
+  /* 3. Paint over the Bottom Home Indicator Pad */
+  body::after {
+    content: "";
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-bottom, 0px);
+    background-color: #070707;
+    z-index: 999999;
+    pointer-events: none;
+  }
 }
 
 #root {
