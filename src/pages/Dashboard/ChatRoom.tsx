@@ -25,7 +25,7 @@ function ChatRoom() {
   if (isLoading) return null;
 
   return (
-    <div className="fixed top-0 left-0 h-dvh w-full overflow-hidden bg-(--neutral-bg)">
+    <div className="fixed top-0 left-0 h-dvh w-full bg-(--neutral-bg)">
       <ActiveTabs />
     </div>
   );
