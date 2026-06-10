@@ -20,7 +20,7 @@ function AppRoutes() {
   }, []);
 
   return (
-    <div className="fixed inset-0 overflow-hidden overscroll-none bg-linear-to-b from-(--p600) to-(--p300)">
+    <div className="fixed inset-0 overflow-hidden overscroll-none">
       <AnimatePresence mode="sync">
         <Routes location={location} key={location.pathname}>
           <Route

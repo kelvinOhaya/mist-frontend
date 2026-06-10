@@ -37,7 +37,9 @@ function LeaveGroupModal({ trigger }: LeaveGroupProps) {
           highlight={false}
           onClick={async () => {
             setIsInChatView(false);
-            await leaveChatRoom();
+            setTimeout(async () => {
+              await leaveChatRoom();
+            }, 300);
           }}
         >
           Leave

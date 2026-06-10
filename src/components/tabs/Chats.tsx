@@ -1,6 +1,6 @@
 import useChatRoom from "@contexts/chatRoom/useChatRoom";
 import ProfilePicture from "@components/profile/ProfilePicture";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CreateGroupModal from "@components/shared/modals/CreateGroupModal";
 import { AnimatePresence } from "framer-motion";
 // import { useEffect } from "react";
@@ -11,8 +11,14 @@ interface ChatsProps {
 }
 
 function Chats({ onOpenChat }: ChatsProps) {
-  const { chatRooms, currentChatId, activateChat, messagesCache } =
-    useChatRoom();
+  const {
+    chatRooms,
+    currentChatId,
+    activateChat,
+    messagesCache,
+    setIsInChatView,
+    currentChat,
+  } = useChatRoom();
   const [createGroupModalTrigger, setCreateGroupModalTrigger] =
     useState<boolean>(false);
 
@@ -29,10 +35,10 @@ function Chats({ onOpenChat }: ChatsProps) {
         <span className=" text-3xl">Chats</span>
         {/* Create group chat button */}
         <button
-          className="rounded-full absolute sm:relative max-sm:bottom-8 max-sm:right-8 bg-(--p300) w-8 h-8"
+          className="rounded-full absolute bottom-8 right-8 bg-linear-to-b from-(--p200) to-(--p400) w-16 h-16"
           onClick={() => setCreateGroupModalTrigger(true)}
         >
-          <span className="text-3xl">+</span>
+          <span className="text-7xl">+</span>
         </button>
       </div>
       <div className="mr-auto flex w-full flex-col items-center gap-2.5 bg-transparent">

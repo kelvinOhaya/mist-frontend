@@ -51,7 +51,7 @@ function CreateGroupModal({ trigger }: ModalWithInputProps) {
       )}
       <div className="flex gap-2 w-full">
         <ModalButton highlight={false} onClick={() => handleSubmit()}>
-          <span className="whitespace-nowrap">Change name</span>
+          <span className="whitespace-nowrap">Create Group</span>
         </ModalButton>
         <ModalButton highlight={true} onClick={() => trigger()}>
           Cancel
